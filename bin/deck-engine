@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 
 /**
- * PipesNow DeckEngine CLI
- * 🎮 Interface de linha de comando para gerenciar pipelines
+ * PipesNow DeckEngine V2 CLI
+ * 🎮 Interface de linha de comando para gerenciar pipelines V2
  */
 
-// Importação direta para evitar problemas
-const DeckEngine = require("../src/deck-engine");
+const DeckEngine = require("../index");
 const fs = require("fs");
 const path = require("path");
 
@@ -27,8 +26,11 @@ function log(message, color = "reset") {
 }
 
 function showHelp() {
-  log("\n🎮 PipesNow DeckEngine CLI", "cyan");
-  log("Sistema de pipelines assíncronos inspirado no Hearthstone\n", "bright");
+  log("\n🎮 PipesNow DeckEngine V2 CLI", "cyan");
+  log(
+    "Sistema de pipelines com User Management e Stripe Integration\n",
+    "bright"
+  );
 
   log("Comandos disponíveis:", "yellow");
   log("  create <nome>     📝 Criar novo deck (arquivo .deck.js)", "green");
@@ -39,26 +41,51 @@ function showHelp() {
   log("  version           📊 Mostrar versão", "green");
   log("  help              ❓ Mostrar esta ajuda", "green");
 
+  log("\nTemplates especiais:", "yellow");
+  log("  create-user-deck <nome>     👤 Template User Management", "magenta");
+  log(
+    "  create-stripe-deck <nome>   💳 Template Stripe Integration",
+    "magenta"
+  );
+
   log("\nExemplos:", "yellow");
   log("  deck-engine create meu-pipeline", "blue");
+  log("  deck-engine create-user-deck user-management", "blue");
+  log("  deck-engine create-stripe-deck stripe-payments", "blue");
   log("  deck-engine run meu-pipeline", "blue");
-  log("  deck-engine health", "blue");
 
   log(
     "\n🃏 Conceitos: Deck=Pipeline, Card=Step, Match=Execução, Arena=Queue\n"
   );
 }
 
-function createDeckTemplate(name) {
-  const template = `/**
+function createDeckTemplate(name, type = "basic") {
+  let template;
+
+  if (type === "user") {
+    template = createUserManagementTemplate(name);
+  } else if (type === "stripe") {
+    template = createStripeTemplate(name);
+  } else {
+    template = createBasicTemplate(name);
+  }
+
+  const filename = `${name}.deck.js`;
+  fs.writeFileSync(filename, template);
+  log(`✅ Deck criado: ${filename}`, "green");
+  log(`💡 Execute: deck-engine run ${name}`, "yellow");
+}
+
+function createBasicTemplate(name) {
+  return `/**
  * 🎴 Deck: ${name}
- * Criado automaticamente pelo DeckEngine CLI
+ * Criado automaticamente pelo DeckEngine V2 CLI
  */
 
 const DeckEngine = require('pipesnow-deck-engine');
 
-// Criar engine
-const engine = new DeckEngine();
+// Criar engine V2
+const engine = new DeckEngine({ version: 'v2' });
 
 // Criar deck "${name}"
 const deck = engine.createDeck('${name}', {
@@ -112,11 +139,434 @@ if (require.main === module) {
   executar();
 }
 `;
+}
 
-  const filename = `${name}.deck.js`;
-  fs.writeFileSync(filename, template);
-  log(`✅ Deck criado: ${filename}`, "green");
-  log(`💡 Execute: deck-engine run ${name}`, "yellow");
+function createUserManagementTemplate(name) {
+  return `/**
+ * 👤 User Management Deck: ${name}
+ * Template para gestão de usuários com Clerk/Auth
+ */
+
+const DeckEngine = require('pipesnow-deck-engine');
+
+// Criar engine V2
+const engine = new DeckEngine({ version: 'v2' });
+
+// Criar deck de User Management
+const deck = engine.createDeck('${name}', {
+  concurrency: 2,
+  timeout: 30000
+});
+
+// 👤 User Management Pipeline
+deck
+  .addCard('validate-user-data', async (context) => {
+    console.log('🔍 Validando dados do usuário...');
+    
+    const { email, name, metadata } = context;
+    
+    if (!email || !email.includes('@')) {
+      throw new Error('Email inválido');
+    }
+    
+    if (!name || name.length < 2) {
+      throw new Error('Nome deve ter pelo menos 2 caracteres');
+    }
+    
+    return {
+      ...context,
+      validated: true,
+      sanitizedData: {
+        email: email.toLowerCase().trim(),
+        name: name.trim(),
+        metadata: metadata || {}
+      }
+    };
+  })
+  
+  .addCard('check-existing-user', async (context) => {
+    console.log('👥 Verificando usuário existente...');
+    
+    // Simular busca no Clerk/Database
+    const userExists = Math.random() > 0.7; // 30% chance de existir
+    
+    if (userExists && context.operation === 'create') {
+      throw new Error('Usuário já existe com este email');
+    }
+    
+    return {
+      ...context,
+      userExists,
+      userId: userExists ? \`user_\${Date.now()}\` : null
+    };
+  })
+  
+  .addCard('sync-with-auth-provider', async (context) => {
+    console.log('🔐 Sincronizando com provedor de autenticação...');
+    
+    // Simular sync com Clerk
+    const authProviderData = {
+      clerkId: \`clerk_\${Date.now()}\`,
+      emailVerified: true,
+      lastSignIn: new Date().toISOString(),
+      publicMetadata: context.sanitizedData.metadata
+    };
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    return {
+      ...context,
+      authProvider: authProviderData,
+      synced: true
+    };
+  })
+  
+  .addCard('update-user-database', async (context) => {
+    console.log('💾 Atualizando database de usuários...');
+    
+    // Simular operação no database
+    const userData = {
+      id: context.userId || \`user_\${Date.now()}\`,
+      ...context.sanitizedData,
+      clerkId: context.authProvider.clerkId,
+      status: 'active',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    return {
+      ...context,
+      userData,
+      saved: true
+    };
+  })
+  
+  .addCard('send-welcome-notification', async (context) => {
+    console.log('📧 Enviando notificação de boas-vindas...');
+    
+    // Simular envio de email
+    const notification = {
+      to: context.sanitizedData.email,
+      subject: 'Bem-vindo!',
+      template: 'welcome',
+      data: {
+        name: context.sanitizedData.name,
+        userId: context.userData.id
+      },
+      sent: true,
+      sentAt: new Date().toISOString()
+    };
+    
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    return {
+      ...context,
+      notification,
+      completed: true
+    };
+  });
+
+// Exportar
+module.exports = { engine, deck };
+
+// Executar se chamado diretamente
+if (require.main === module) {
+  async function executarUserManagement() {
+    try {
+      console.log('👤 Executando User Management Pipeline...');
+      
+      // Dados de exemplo
+      const userData = {
+        email: 'novo.usuario@exemplo.com',
+        name: 'Novo Usuário',
+        operation: 'create',
+        metadata: {
+          source: 'registration_form',
+          plan: 'free'
+        }
+      };
+      
+      const resultado = await engine.playMatch('${name}', userData);
+      
+      console.log('🎉 Pipeline de usuário concluído!');
+      console.log('📊 Resultado:', JSON.stringify(resultado, null, 2));
+      
+    } catch (error) {
+      console.error('❌ Erro no User Management:', error.message);
+      process.exit(1);
+    }
+  }
+  
+  executarUserManagement();
+}
+`;
+}
+
+function createStripeTemplate(name) {
+  return `/**
+ * 💳 Stripe Integration Deck: ${name}
+ * Template para processamento de pagamentos e produtos
+ */
+
+const DeckEngine = require('pipesnow-deck-engine');
+
+// Criar engine V2
+const engine = new DeckEngine({ version: 'v2' });
+
+// Criar deck de Stripe Integration
+const deck = engine.createDeck('${name}', {
+  concurrency: 1, // Pagamentos em sequência por segurança
+  timeout: 45000  // Timeout maior para API calls
+});
+
+// 💳 Stripe Payment Pipeline
+deck
+  .addCard('validate-payment-data', async (context) => {
+    console.log('🔍 Validando dados de pagamento...');
+    
+    const { productId, priceId, customerId, quantity = 1 } = context;
+    
+    if (!productId) throw new Error('Product ID é obrigatório');
+    if (!priceId) throw new Error('Price ID é obrigatório');
+    if (!customerId) throw new Error('Customer ID é obrigatório');
+    if (quantity < 1) throw new Error('Quantidade deve ser maior que 0');
+    
+    return {
+      ...context,
+      validated: true,
+      paymentData: {
+        productId,
+        priceId,
+        customerId,
+        quantity: parseInt(quantity)
+      }
+    };
+  })
+  
+  .addCard('fetch-stripe-product', async (context) => {
+    console.log('📦 Buscando produto no Stripe...');
+    
+    // Simular busca no Stripe
+    const product = {
+      id: context.paymentData.productId,
+      name: 'Produto Exemplo',
+      description: 'Descrição do produto',
+      active: true,
+      metadata: {
+        category: 'digital',
+        plan_type: 'subscription'
+      }
+    };
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    if (!product.active) {
+      throw new Error('Produto não está ativo');
+    }
+    
+    return {
+      ...context,
+      product
+    };
+  })
+  
+  .addCard('fetch-stripe-price', async (context) => {
+    console.log('💰 Buscando preço no Stripe...');
+    
+    // Simular busca de preço
+    const price = {
+      id: context.paymentData.priceId,
+      object: 'price',
+      active: true,
+      currency: 'brl',
+      product: context.paymentData.productId,
+      unit_amount: 2999, // R$ 29.99
+      recurring: {
+        interval: 'month',
+        interval_count: 1
+      }
+    };
+    
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    if (!price.active) {
+      throw new Error('Preço não está ativo');
+    }
+    
+    return {
+      ...context,
+      price,
+      totalAmount: price.unit_amount * context.paymentData.quantity
+    };
+  })
+  
+  .addCard('verify-customer', async (context) => {
+    console.log('👤 Verificando cliente no Stripe...');
+    
+    // Simular busca do customer
+    const customer = {
+      id: context.paymentData.customerId,
+      email: 'cliente@exemplo.com',
+      name: 'Cliente Exemplo',
+      default_source: 'card_exemplo123',
+      subscriptions: {
+        data: []
+      }
+    };
+    
+    await new Promise(resolve => setTimeout(resolve, 400));
+    
+    return {
+      ...context,
+      customer
+    };
+  })
+  
+  .addCard('create-payment-intent', async (context) => {
+    console.log('💳 Criando Payment Intent...');
+    
+    // Simular criação do Payment Intent
+    const paymentIntent = {
+      id: \`pi_\${Date.now()}\`,
+      object: 'payment_intent',
+      amount: context.totalAmount,
+      currency: context.price.currency,
+      customer: context.customer.id,
+      status: 'requires_payment_method',
+      client_secret: \`pi_\${Date.now()}_secret_exemplo\`,
+      metadata: {
+        product_id: context.product.id,
+        price_id: context.price.id,
+        quantity: context.paymentData.quantity.toString()
+      }
+    };
+    
+    await new Promise(resolve => setTimeout(resolve, 600));
+    
+    return {
+      ...context,
+      paymentIntent
+    };
+  })
+  
+  .addCard('simulate-payment-confirmation', async (context) => {
+    console.log('✅ Simulando confirmação de pagamento...');
+    
+    // Simular webhook do Stripe
+    const isSuccessful = Math.random() > 0.1; // 90% de sucesso
+    
+    if (!isSuccessful) {
+      throw new Error('Pagamento foi recusado pelo banco');
+    }
+    
+    const confirmedPayment = {
+      ...context.paymentIntent,
+      status: 'succeeded',
+      charges: {
+        data: [{
+          id: \`ch_\${Date.now()}\`,
+          amount: context.totalAmount,
+          currency: context.price.currency,
+          paid: true,
+          receipt_url: \`https://pay.stripe.com/receipts/exemplo\`
+        }]
+      }
+    };
+    
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    return {
+      ...context,
+      paymentConfirmed: true,
+      confirmedPayment,
+      receiptUrl: confirmedPayment.charges.data[0].receipt_url
+    };
+  })
+  
+  .addCard('update-user-subscription', async (context) => {
+    console.log('📋 Atualizando assinatura do usuário...');
+    
+    // Simular atualização no database local
+    const subscription = {
+      userId: context.customer.id,
+      productId: context.product.id,
+      priceId: context.price.id,
+      status: 'active',
+      currentPeriodStart: new Date().toISOString(),
+      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // +30 dias
+      paymentIntentId: context.confirmedPayment.id
+    };
+    
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    return {
+      ...context,
+      subscription,
+      updated: true
+    };
+  })
+  
+  .addCard('send-purchase-confirmation', async (context) => {
+    console.log('📧 Enviando confirmação de compra...');
+    
+    // Simular envio de email de confirmação
+    const confirmation = {
+      to: context.customer.email,
+      subject: 'Compra confirmada!',
+      template: 'purchase_confirmation',
+      data: {
+        customerName: context.customer.name,
+        productName: context.product.name,
+        amount: context.totalAmount / 100, // Converter centavos
+        currency: context.price.currency.toUpperCase(),
+        receiptUrl: context.receiptUrl
+      },
+      sent: true,
+      sentAt: new Date().toISOString()
+    };
+    
+    await new Promise(resolve => setTimeout(resolve, 400));
+    
+    return {
+      ...context,
+      confirmation,
+      completed: true
+    };
+  });
+
+// Exportar
+module.exports = { engine, deck };
+
+// Executar se chamado diretamente
+if (require.main === module) {
+  async function executarStripeIntegration() {
+    try {
+      console.log('💳 Executando Stripe Integration Pipeline...');
+      
+      // Dados de exemplo de uma compra
+      const purchaseData = {
+        productId: 'prod_exemplo123',
+        priceId: 'price_exemplo456',
+        customerId: 'cus_exemplo789',
+        quantity: 1
+      };
+      
+      const resultado = await engine.playMatch('${name}', purchaseData);
+      
+      console.log('🎉 Pipeline de pagamento concluído!');
+      console.log('📊 Resultado:', JSON.stringify(resultado, null, 2));
+      
+    } catch (error) {
+      console.error('❌ Erro no Stripe Integration:', error.message);
+      process.exit(1);
+    }
+  }
+  
+  executarStripeIntegration();
+}
+`;
 }
 
 function listDecks() {
@@ -130,6 +580,14 @@ function listDecks() {
   if (files.length === 0) {
     log("  Nenhum deck encontrado", "yellow");
     log("  💡 Crie um com: deck-engine create meu-deck", "blue");
+    log(
+      "  👤 Template User: deck-engine create-user-deck user-mgmt",
+      "magenta"
+    );
+    log(
+      "  💳 Template Stripe: deck-engine create-stripe-deck payments",
+      "magenta"
+    );
   } else {
     files.forEach((deck) => {
       log(`  🎴 ${deck}`, "green");
@@ -148,8 +606,6 @@ async function runDeck(deckName) {
 
   try {
     log(`🎮 Executando deck: ${deckName}`, "cyan");
-
-    // Executar o arquivo deck
     require(path.resolve(filename));
   } catch (error) {
     log(`❌ Erro ao executar deck: ${error.message}`, "red");
@@ -159,19 +615,19 @@ async function runDeck(deckName) {
 
 function showHealth() {
   try {
-    const engine = new DeckEngine();
+    const engine = new DeckEngine({ version: "v2" });
     const health = engine.healthCheck();
 
-    log("🏥 Status do Sistema:", "cyan");
+    log("🏥 Status do Sistema V2:", "cyan");
     log(
       `  Status: ${health.status}`,
       health.status === "healthy" ? "green" : "red"
     );
-    log(`  Uptime: ${health.uptime}ms`, "blue");
     log(`  Versão: ${health.version}`, "blue");
-    log(`  Decks: ${health.decks}`, "blue");
-    log(`  Arena: ${health.arena.status}`, "blue");
-    log(`  Fila: ${health.arena.queueSize} items`, "blue");
+    log(`  Platform: ${health.platform}`, "blue");
+    log(`  Uptime: ${health.uptime}ms`, "blue");
+    log(`  Domains: ${health.system?.domains?.total || 0}`, "blue");
+    log(`  Decks: ${health.system?.decks?.total || 0}`, "blue");
   } catch (error) {
     log(`❌ Erro no health check: ${error.message}`, "red");
     process.exit(1);
@@ -179,37 +635,38 @@ function showHealth() {
 }
 
 async function runDemo() {
-  log("🎯 Executando demonstração...", "cyan");
+  log("🎯 Executando demonstração V2...", "cyan");
 
   try {
-    const engine = new DeckEngine();
+    const engine = new DeckEngine({ version: "v2" });
 
-    // Criar deck demo
-    const demo = engine.createDeck("demo-cli", {
+    const demo = engine.createDeck("demo-cli-v2", {
       concurrency: 1,
     });
 
     demo
       .addCard("saudar", async (context) => {
-        log("👋 Olá do DeckEngine CLI!", "green");
+        log("👋 Olá do DeckEngine V2 CLI!", "green");
         return { ...context, saudacao: true };
       })
-      .addCard("processar", async (context) => {
-        log("⚙️ Processando...", "yellow");
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        return { ...context, processado: true };
+      .addCard("demonstrar-domains", async (context) => {
+        log("🏰 Demonstrando sistema de domains...", "yellow");
+        const domains = engine.getInstalledDomains();
+        log(`📊 Domains instalados: ${domains.length}`, "blue");
+        return { ...context, domains };
       })
       .addCard("finalizar", async (context) => {
-        log("🎉 Demo concluída!", "green");
+        log("🎉 Demo V2 concluída!", "green");
         return { ...context, concluido: true };
       });
 
-    const resultado = await engine.playMatch("demo-cli", {
-      context: { demo: true },
+    const resultado = await engine.playMatch("demo-cli-v2", {
+      demo: true,
+      version: "v2",
     });
 
-    log("\n📊 Resultado:", "cyan");
-    console.log(JSON.stringify(resultado.result, null, 2));
+    log("\n📊 Resultado V2:", "cyan");
+    console.log(JSON.stringify(resultado, null, 2));
   } catch (error) {
     log(`❌ Erro na demo: ${error.message}`, "red");
     process.exit(1);
@@ -229,7 +686,25 @@ async function main() {
         log("💡 Uso: deck-engine create <nome>", "yellow");
         process.exit(1);
       }
-      createDeckTemplate(param);
+      createDeckTemplate(param, "basic");
+      break;
+
+    case "create-user-deck":
+      if (!param) {
+        log("❌ Nome do deck é obrigatório", "red");
+        log("💡 Uso: deck-engine create-user-deck <nome>", "yellow");
+        process.exit(1);
+      }
+      createDeckTemplate(param, "user");
+      break;
+
+    case "create-stripe-deck":
+      if (!param) {
+        log("❌ Nome do deck é obrigatório", "red");
+        log("💡 Uso: deck-engine create-stripe-deck <nome>", "yellow");
+        process.exit(1);
+      }
+      createDeckTemplate(param, "stripe");
       break;
 
     case "run":
@@ -255,7 +730,7 @@ async function main() {
 
     case "version":
       const { version } = require("../package.json");
-      log(`🎮 DeckEngine v${version}`, "cyan");
+      log(`🎮 DeckEngine V2 v${version}`, "cyan");
       break;
 
     case "help":

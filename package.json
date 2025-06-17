@@ -8,10 +8,10 @@
     "deck-engine": "./bin/deck-engine"
   },
   "scripts": {
-    "start": "node exemplo-uso.js",
-    "test": "node test-deck-engine.js",
-    "demo": "node exemplo-uso.js",
-    "examples": "node exemplos-avancados.js",
+    "start": "node examples/simple-test.js",
+    "test": "node examples/test-v2.js",
+    "demo": "node examples/simple-test.js",
+    "examples": "node examples/test-v2.js",
     "health": "node -e \"const DeckEngine = require('./index.js'); const engine = new DeckEngine(); console.log(JSON.stringify(engine.healthCheck(), null, 2));\"",
     "clean": "node -e \"const DeckEngine = require('./index.js'); const engine = new DeckEngine(); console.log(engine.cleanup());\"",
     "prepublishOnly": "npm test",
@@ -58,10 +58,11 @@
   },
   "files": [
     "index.js",
-    "index.d.ts",
-    "src/",
+    "deck-engine-v2.js",
+    "core/",
     "bin/",
     "docs/",
+    "index.d.ts",
     "README.md",
     "LICENSE"
   ],

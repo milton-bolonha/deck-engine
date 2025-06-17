@@ -454,12 +454,23 @@ class DeckEngine {
   async shutdown() {
     this.stopProcessing();
 
+    // 🛑 FORÇAR limpeza de TODOS os timers
     if (this.cleanupInterval) {
       clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+    }
+
+    // 🛑 Limpar qualquer timer ativo
+    if (this.processingInterval) {
+      clearInterval(this.processingInterval);
+      this.processingInterval = null;
     }
 
     this.eventSystem.emit("engine:shutdown");
     this.eventSystem.clear();
+
+    // 🛑 GARANTIR que tudo pare
+    this.processing = false;
   }
 }
 
