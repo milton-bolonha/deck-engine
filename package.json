@@ -1,0 +1,79 @@
+{
+  "name": "pipesnow-deck-engine",
+  "version": "1.0.0",
+  "description": "🎮 Sistema de pipelines assíncronos inspirado no Hearthstone - Deck = Pipeline, Card = Step, Match = Execução, Arena = Queue",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "bin": {
+    "deck-engine": "./bin/deck-engine"
+  },
+  "scripts": {
+    "start": "node exemplo-uso.js",
+    "test": "node test-deck-engine.js",
+    "demo": "node exemplo-uso.js",
+    "examples": "node exemplos-avancados.js",
+    "health": "node -e \"const DeckEngine = require('./index.js'); const engine = new DeckEngine(); console.log(JSON.stringify(engine.healthCheck(), null, 2));\"",
+    "clean": "node -e \"const DeckEngine = require('./index.js'); const engine = new DeckEngine(); console.log(engine.cleanup());\"",
+    "prepublishOnly": "npm test",
+    "prepack": "echo 'Preparando pacote para publicação...'",
+    "postpack": "echo 'Pacote preparado com sucesso!'"
+  },
+  "keywords": [
+    "pipeline",
+    "workflow",
+    "orchestration",
+    "async",
+    "queue",
+    "hearthstone",
+    "deck",
+    "cards",
+    "gaming",
+    "task-runner",
+    "job-queue",
+    "automation",
+    "nodejs",
+    "javascript",
+    "concurrent",
+    "parallel",
+    "scheduler",
+    "executor"
+  ],
+  "author": {
+    "name": "DeckEngine Team",
+    "email": "team@deckengine.dev",
+    "url": "https://github.com/your-org/pipesnow-deck-engine"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-org/pipesnow-deck-engine.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/pipesnow-deck-engine/issues"
+  },
+  "homepage": "https://github.com/your-org/pipesnow-deck-engine#readme",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "src/",
+    "bin/",
+    "docs/",
+    "README.md",
+    "LICENSE"
+  ],
+  "directories": {
+    "lib": "src"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "devDependencies": {},
+  "dependencies": {},
+  "peerDependencies": {},
+  "optionalDependencies": {}
+}

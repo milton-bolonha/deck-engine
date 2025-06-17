@@ -1,0 +1,281 @@
+#!/usr/bin/env node
+
+/**
+ * PipesNow DeckEngine CLI
+ * 🎮 Interface de linha de comando para gerenciar pipelines
+ */
+
+// Importação direta para evitar problemas
+const DeckEngine = require("../src/deck-engine");
+const fs = require("fs");
+const path = require("path");
+
+// Cores para terminal
+const colors = {
+  reset: "\x1b[0m",
+  bright: "\x1b[1m",
+  green: "\x1b[32m",
+  red: "\x1b[31m",
+  yellow: "\x1b[33m",
+  blue: "\x1b[34m",
+  magenta: "\x1b[35m",
+  cyan: "\x1b[36m",
+};
+
+function log(message, color = "reset") {
+  console.log(`${colors[color]}${message}${colors.reset}`);
+}
+
+function showHelp() {
+  log("\n🎮 PipesNow DeckEngine CLI", "cyan");
+  log("Sistema de pipelines assíncronos inspirado no Hearthstone\n", "bright");
+
+  log("Comandos disponíveis:", "yellow");
+  log("  create <nome>     📝 Criar novo deck (arquivo .deck.js)", "green");
+  log("  run <deck>        ⚔️  Executar deck existente", "green");
+  log("  list              📋 Listar decks disponíveis", "green");
+  log("  health            🏥 Verificar saúde do sistema", "green");
+  log("  demo              🎯 Executar demonstração", "green");
+  log("  version           📊 Mostrar versão", "green");
+  log("  help              ❓ Mostrar esta ajuda", "green");
+
+  log("\nExemplos:", "yellow");
+  log("  deck-engine create meu-pipeline", "blue");
+  log("  deck-engine run meu-pipeline", "blue");
+  log("  deck-engine health", "blue");
+
+  log(
+    "\n🃏 Conceitos: Deck=Pipeline, Card=Step, Match=Execução, Arena=Queue\n"
+  );
+}
+
+function createDeckTemplate(name) {
+  const template = `/**
+ * 🎴 Deck: ${name}
+ * Criado automaticamente pelo DeckEngine CLI
+ */
+
+const DeckEngine = require('pipesnow-deck-engine');
+
+// Criar engine
+const engine = new DeckEngine();
+
+// Criar deck "${name}"
+const deck = engine.createDeck('${name}', {
+  concurrency: 3,
+  timeout: 30000,
+  retryDelay: 1000
+});
+
+// 🎯 Adicionar cards (etapas do pipeline)
+deck
+  .addCard('inicio', async (context) => {
+    console.log('🚀 Iniciando processamento...');
+    return { ...context, started: true, timestamp: new Date() };
+  })
+  
+  .addCard('processar', async (context) => {
+    console.log('⚙️ Processando dados...');
+    // Simular processamento
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    return { ...context, processed: true, data: 'resultado-exemplo' };
+  })
+  
+  .addCard('finalizar', async (context) => {
+    console.log('✅ Finalizando...');
+    return { 
+      ...context, 
+      completed: true, 
+      duration: Date.now() - context.timestamp.getTime() 
+    };
+  });
+
+// Exportar para uso CLI ou require
+module.exports = { engine, deck };
+
+// Se executado diretamente
+if (require.main === module) {
+  async function executar() {
+    try {
+      console.log('🎮 Executando deck "${name}"...');
+      const resultado = await engine.playMatch('${name}', {
+        context: { nome: '${name}', criado: new Date() }
+      });
+      
+      console.log('🎉 Sucesso!', resultado);
+    } catch (error) {
+      console.error('❌ Erro:', error.message);
+      process.exit(1);
+    }
+  }
+  
+  executar();
+}
+`;
+
+  const filename = `${name}.deck.js`;
+  fs.writeFileSync(filename, template);
+  log(`✅ Deck criado: ${filename}`, "green");
+  log(`💡 Execute: deck-engine run ${name}`, "yellow");
+}
+
+function listDecks() {
+  log("📋 Decks disponíveis:", "cyan");
+
+  const files = fs
+    .readdirSync(".")
+    .filter((file) => file.endsWith(".deck.js"))
+    .map((file) => file.replace(".deck.js", ""));
+
+  if (files.length === 0) {
+    log("  Nenhum deck encontrado", "yellow");
+    log("  💡 Crie um com: deck-engine create meu-deck", "blue");
+  } else {
+    files.forEach((deck) => {
+      log(`  🎴 ${deck}`, "green");
+    });
+  }
+}
+
+async function runDeck(deckName) {
+  const filename = `${deckName}.deck.js`;
+
+  if (!fs.existsSync(filename)) {
+    log(`❌ Deck não encontrado: ${filename}`, "red");
+    log("💡 Crie com: deck-engine create " + deckName, "yellow");
+    process.exit(1);
+  }
+
+  try {
+    log(`🎮 Executando deck: ${deckName}`, "cyan");
+
+    // Executar o arquivo deck
+    require(path.resolve(filename));
+  } catch (error) {
+    log(`❌ Erro ao executar deck: ${error.message}`, "red");
+    process.exit(1);
+  }
+}
+
+function showHealth() {
+  try {
+    const engine = new DeckEngine();
+    const health = engine.healthCheck();
+
+    log("🏥 Status do Sistema:", "cyan");
+    log(
+      `  Status: ${health.status}`,
+      health.status === "healthy" ? "green" : "red"
+    );
+    log(`  Uptime: ${health.uptime}ms`, "blue");
+    log(`  Versão: ${health.version}`, "blue");
+    log(`  Decks: ${health.decks}`, "blue");
+    log(`  Arena: ${health.arena.status}`, "blue");
+    log(`  Fila: ${health.arena.queueSize} items`, "blue");
+  } catch (error) {
+    log(`❌ Erro no health check: ${error.message}`, "red");
+    process.exit(1);
+  }
+}
+
+async function runDemo() {
+  log("🎯 Executando demonstração...", "cyan");
+
+  try {
+    const engine = new DeckEngine();
+
+    // Criar deck demo
+    const demo = engine.createDeck("demo-cli", {
+      concurrency: 1,
+    });
+
+    demo
+      .addCard("saudar", async (context) => {
+        log("👋 Olá do DeckEngine CLI!", "green");
+        return { ...context, saudacao: true };
+      })
+      .addCard("processar", async (context) => {
+        log("⚙️ Processando...", "yellow");
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        return { ...context, processado: true };
+      })
+      .addCard("finalizar", async (context) => {
+        log("🎉 Demo concluída!", "green");
+        return { ...context, concluido: true };
+      });
+
+    const resultado = await engine.playMatch("demo-cli", {
+      context: { demo: true },
+    });
+
+    log("\n📊 Resultado:", "cyan");
+    console.log(JSON.stringify(resultado.result, null, 2));
+  } catch (error) {
+    log(`❌ Erro na demo: ${error.message}`, "red");
+    process.exit(1);
+  }
+}
+
+// Processar argumentos
+const args = process.argv.slice(2);
+const command = args[0];
+const param = args[1];
+
+async function main() {
+  switch (command) {
+    case "create":
+      if (!param) {
+        log("❌ Nome do deck é obrigatório", "red");
+        log("💡 Uso: deck-engine create <nome>", "yellow");
+        process.exit(1);
+      }
+      createDeckTemplate(param);
+      break;
+
+    case "run":
+      if (!param) {
+        log("❌ Nome do deck é obrigatório", "red");
+        log("💡 Uso: deck-engine run <nome>", "yellow");
+        process.exit(1);
+      }
+      await runDeck(param);
+      break;
+
+    case "list":
+      listDecks();
+      break;
+
+    case "health":
+      showHealth();
+      break;
+
+    case "demo":
+      await runDemo();
+      break;
+
+    case "version":
+      const { version } = require("../package.json");
+      log(`🎮 DeckEngine v${version}`, "cyan");
+      break;
+
+    case "help":
+    case "--help":
+    case "-h":
+      showHelp();
+      break;
+
+    default:
+      if (!command) {
+        showHelp();
+      } else {
+        log(`❌ Comando desconhecido: ${command}`, "red");
+        log("💡 Use: deck-engine help", "yellow");
+        process.exit(1);
+      }
+  }
+}
+
+main().catch((error) => {
+  log(`❌ Erro inesperado: ${error.message}`, "red");
+  process.exit(1);
+});
