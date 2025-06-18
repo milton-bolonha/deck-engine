@@ -1,6 +1,6 @@
 {
-  "name": "pipesnow-deck-engine",
-  "version": "1.0.0",
+  "name": "deck-engine",
+  "version": "0.1.0",
   "description": "🎮 Sistema de pipelines assíncronos inspirado no Hearthstone - Deck = Pipeline, Card = Step, Match = Execução, Arena = Queue",
   "main": "index.js",
   "types": "index.d.ts",
@@ -58,17 +58,17 @@
   "author": {
     "name": "DeckEngine Team",
     "email": "team@deckengine.dev",
-    "url": "https://github.com/your-org/pipesnow-deck-engine"
+    "url": "https://github.com/your-org/deck-engine"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/your-org/pipesnow-deck-engine.git"
+    "url": "git+https://github.com/your-org/deck-engine.git"
   },
   "bugs": {
-    "url": "https://github.com/your-org/pipesnow-deck-engine/issues"
+    "url": "https://github.com/your-org/deck-engine/issues"
   },
-  "homepage": "https://github.com/your-org/pipesnow-deck-engine#readme",
+  "homepage": "https://github.com/your-org/deck-engine#readme",
   "engines": {
     "node": ">=14.0.0",
     "npm": ">=6.0.0"
