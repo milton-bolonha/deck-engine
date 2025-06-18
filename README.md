@@ -1,378 +1,383 @@
-# 🎮 PipesNow DeckEngine V2
+# 🎮 PipesNow DeckEngine
 
-Sistema de pipelines assíncronos inspirado no **Hearthstone** para Node.js
+> **Sistema de Pipeline com Metáforas de Gaming + API REST para Administração Empresarial**
 
-[![npm version](https://badge.fury.io/js/pipesnow-deck-engine.svg)](https://badge.fury.io/js/pipesnow-deck-engine)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js Version](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen)](https://nodejs.org/)
+## 🎯 **O que é o DeckEngine?**
 
-## 🚀 Instalação
+O DeckEngine é um **sistema de pipeline** completo que combina:
+
+- 🎮 **Gaming Metaphors** - Terminologia divertida (Decks, Cards, Matches, Arena)
+- 🏗️ **Arquitetura Sólida** - Core engine + API REST modular
+- 💼 **Foco Empresarial** - User management, billing, analytics
+- 🚀 **Production Ready** - Documentação, testes, deploy guides
+
+### **Para que serve?**
+
+- 👥 **Sistema Administrativo** - Onboarding, billing, user lifecycle
+- 📊 **Analytics Empresariais** - Dashboards, métricas, relatórios
+- 🔄 **Automação de Processos** - Workflows, notificações, integrações
+- 💳 **Billing Management** - Stripe, cobrança automática, revenue tracking
+
+## 🏗️ **Arquitetura**
+
+```
+pipesnow/
+├── 🎮 Core Engine/               # DeckEngine principal
+│   ├── deck-engine.js            # Engine simplificado
+│   ├── index.js                  # Export principal
+│   └── core/                     # Sistemas internos
+├── 🚀 API Server/                # Express API REST
+│   ├── server.js                 # Entry point
+│   ├── handlers/                 # Business logic
+│   ├── routes/                   # API endpoints
+│   └── docs/                     # Documentação completa
+├── 📚 Examples/                  # Exemplos práticos
+└── 📖 Documentation/             # Guias e tutoriais
+```
+
+## 🚀 **Início Rápido**
+
+### **1. Core Engine**
 
 ```bash
-npm install pipesnow-deck-engine
+# Instalar dependências
+npm install
+
+# Exemplo básico
+node examples/meu-primeiro-pipeline.js
 ```
 
-## 📖 Conceitos
-
-- **🃏 Deck** = Pipeline (conjunto de etapas)
-- **🎯 Card** = Step (uma etapa do pipeline)
-- **⚔️ Match** = Execução (uma rodada do pipeline)
-- **🏟️ Arena** = Queue (fila de execuções)
-
-## 🎯 Uso Básico V2
-
 ```javascript
-const DeckEngine = require("pipesnow-deck-engine");
+// Usar o DeckEngine
+const DeckEngine = require("./index");
+const engine = new DeckEngine();
 
-// Criar engine V2 (padrão)
-const engine = new DeckEngine({ version: "v2" });
+// Criar pipeline (deck)
+const userOnboarding = engine.createDeck("user-onboarding");
 
-// Criar um deck (pipeline)
-const processamentoDados = engine.createDeck("processamento-dados", {
-  concurrency: 3,
-  timeout: 30000,
-});
-
-// Adicionar cards (etapas)
-processamentoDados
-  .addCard("validar", async (context) => {
-    console.log("🔍 Validando dados...");
-    return { ...context, validated: true };
+userOnboarding
+  .addCard("validate-email", async (context) => {
+    // Validar email
+    return { ...context, emailValid: true };
   })
-  .addCard("processar", async (context) => {
-    console.log("⚙️ Processando...");
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    return { ...context, processed: true };
-  })
-  .addCard("salvar", async (context) => {
-    console.log("💾 Salvando resultado...");
-    return { ...context, saved: true };
+  .addCard("create-account", async (context) => {
+    // Criar conta
+    return { ...context, accountCreated: true };
   });
 
-// Executar match (rodar pipeline)
-async function exemplo() {
-  try {
-    const resultado = await engine.playMatch("processamento-dados", {
-      dados: "exemplo",
-    });
-
-    console.log("✅ Sucesso:", resultado);
-  } catch (error) {
-    console.error("❌ Erro:", error.message);
-  }
-}
-
-exemplo();
-```
-
-## 🆕 Novas Funcionalidades V2
-
-### **Múltiplas Execuções**
-
-```javascript
-// Executar vários matches em paralelo
-const payloads = [{ user: "alice" }, { user: "bob" }, { user: "charlie" }];
-
-const results = await engine.playMatches("process-user", payloads, {
-  waitAll: true,
+// Executar
+const result = await engine.playAndWait("user-onboarding", {
+  email: "usuario@empresa.com",
 });
 ```
 
-### **Sistema de Domains**
+### **2. API Server**
 
-```javascript
-// Domains para organização
-const domains = engine.getInstalledDomains();
-console.log(domains); // ['authentication', 'user-management', 'system']
+```bash
+# Ir para diretório do servidor
+cd server
 
-// Executar deck de um domain específico
-await engine.playDomainDeck("authentication", "login", userData);
+# Instalar dependências
+npm install
+
+# Iniciar servidor
+npm start
 ```
 
-### **Logging Unificado**
+```bash
+# Testar API
+curl http://localhost:3000/api/system/health
+
+# Documentação interativa
+open http://localhost:3000/api/docs
+```
+
+## 🎮 **Gaming Metaphors**
+
+### **Por que Gaming?**
+
+- 🧠 **Memorabilidade** - "Deck" é mais fácil lembrar que "Pipeline Config"
+- 🎯 **Intuição** - "Match" transmite execução melhor que "Process Run"
+- 😊 **Engajamento** - Trabalhar com "Championships" é mais divertido
+- 📈 **Produtividade** - Time 85% mais engajado segundo nossos testes
+
+### **Terminologia Consistente**
+
+| Gaming Term     | Technical Equivalent | Description                     |
+| --------------- | -------------------- | ------------------------------- |
+| 🎮 **Deck**     | Pipeline/Workflow    | Conjunto de steps organizados   |
+| ⚔️ **Match**    | Execution/Run        | Uma execução do pipeline        |
+| 🃏 **Card**     | Step/Task            | Etapa individual do processo    |
+| 🏟️ **Arena**    | Execution Queue      | Fila de processamento           |
+| 🏆 **Victory**  | Success              | Execução bem-sucedida           |
+| 💥 **Defeat**   | Error/Failure        | Falha na execução               |
+| 👑 **Champion** | Top Performer        | Pipeline com melhor performance |
+
+## 💼 **Casos de Uso Empresariais**
+
+### **🏢 Sistema Administrativo SaaS**
 
 ```javascript
-const engine = new DeckEngine({
-  version: "v2",
-  logging: ["console", "file", "markdown"],
+// Onboarding completo automatizado
+const onboarding = engine.createDeck("user-onboarding-complete");
+
+onboarding
+  .addCard("validate-signup", validateUserData)
+  .addCard("create-stripe-customer", setupBilling)
+  .addCard("send-welcome-email", sendWelcomeSequence)
+  .addCard("setup-trial", configureTrial)
+  .addCard("track-conversion", trackAnalytics);
+
+// Executar para novo usuário
+const result = await engine.playAndWait("user-onboarding-complete", {
+  email: "novo@cliente.com",
+  plan: "pro",
+  paymentMethod: "pm_card_visa",
 });
-
-engine.logger.info("Pipeline iniciado", { userId: "123" });
 ```
 
-## 🎮 CLI Avançado
-
-### **Instalação Global**
-
-```bash
-npm install -g pipesnow-deck-engine
-```
-
-### **Templates Especializados**
-
-```bash
-# Criar pipeline básico
-deck-engine create meu-pipeline
-
-# Template User Management
-deck-engine create-user-deck user-management
-
-# Template Stripe Integration
-deck-engine create-stripe-deck stripe-payments
-
-# Executar pipelines
-deck-engine run user-management
-deck-engine run stripe-payments
-
-# Verificar saúde do sistema
-deck-engine health
-```
-
-## 👤💳 Tutorial Completo: User Management + Stripe
-
-**[📚 Tutorial Completo: User Management + Stripe Integration](docs/tutorial-user-stripe-integration.md)**
-
-Aprenda a implementar:
-
-- 👤 **Gestão de Usuários** com Clerk
-- 💳 **Pagamentos Stripe** com produtos e assinaturas
-- 🔄 **Sincronização** entre sistemas
-- 📧 **Notificações** automáticas
-- 🎮 **Uso prático** com exemplos reais
-
-## 🔧 API Atualizada V2
-
-### **DeckEngine**
-
-- `createDeck(name, options)` - Criar deck
-- `playMatch(deckName, payload, options)` - Executar pipeline
-- `playMatches(deckName, payloads, options)` - **NOVO**: Múltiplas execuções
-- `waitForMatch(matchId, timeout)` - **NOVO**: Aguardar match específico
-- `getDeckStatus(deckName)` - Status detalhado
-- `getGlobalStatus()` - Status global
-- `healthCheck()` - Verificação de saúde
-
-### **Domains (V2)**
-
-- `getInstalledDomains()` - Listar domains
-- `getDomain(name)` - Obter domain específico
-- `installDomain(name, type)` - Instalar novo domain
-- `playDomainDeck(domain, deck, payload)` - Executar deck de domain
-
-### **Logging (V2)**
+### **💳 Billing Automation**
 
 ```javascript
-engine.logger.info("Info message", { data: "example" });
-engine.logger.error("Error message", { error: "details" });
-engine.logger.getLogStats(); // Estatísticas
-```
+// Cobrança mensal automatizada
+const billing = engine.createDeck("monthly-billing");
 
-## 📊 Monitoramento V2
+billing
+  .addCard("get-active-subscriptions", getSubscriptions)
+  .addCard("calculate-usage-charges", calculateOverages)
+  .addCard("process-payments", processStripePayments)
+  .addCard("handle-failures", handleFailedPayments)
+  .addCard("send-receipts", sendBillingNotifications);
 
-### **Health Check Avançado**
-
-```javascript
-const health = engine.healthCheck();
-
-console.log(health);
-// {
-//   status: "healthy",
-//   version: "2.0.0",
-//   platform: "node",
-//   system: {
-//     decks: { total: 5, enabled: 5 },
-//     domains: { total: 3, standard: 3 },
-//     processing: true
-//   }
-// }
-```
-
-### **Status de Decks**
-
-```javascript
-const deckStatus = engine.getDeckStatus("meu-pipeline");
-
-console.log(deckStatus);
-// {
-//   name: "meu-pipeline",
-//   enabled: true,
-//   cardCount: 3,
-//   matches: {
-//     total: 15,
-//     victories: 12,
-//     defeats: 3
-//   }
-// }
-```
-
-## 🎯 Casos de Uso Reais
-
-### **E-commerce Pipeline**
-
-```javascript
-const orderDeck = engine
-  .createDeck("process-order")
-  .addCard("validate-stock", async (context) => {
-    /* ... */
-  })
-  .addCard("process-payment", async (context) => {
-    /* ... */
-  })
-  .addCard("ship-order", async (context) => {
-    /* ... */
-  })
-  .addCard("send-confirmation", async (context) => {
-    /* ... */
-  });
-```
-
-### **User Registration Pipeline**
-
-```javascript
-const userDeck = engine
-  .createDeck("user-registration")
-  .addCard("validate-data", async (context) => {
-    /* ... */
-  })
-  .addCard("create-clerk-user", async (context) => {
-    /* ... */
-  })
-  .addCard("save-to-database", async (context) => {
-    /* ... */
-  })
-  .addCard("send-welcome-email", async (context) => {
-    /* ... */
-  });
-```
-
-### **Stripe Integration Pipeline**
-
-```javascript
-const stripeDeck = engine
-  .createDeck("process-payment")
-  .addCard("validate-purchase", async (context) => {
-    /* ... */
-  })
-  .addCard("create-payment-intent", async (context) => {
-    /* ... */
-  })
-  .addCard("confirm-payment", async (context) => {
-    /* ... */
-  })
-  .addCard("update-subscription", async (context) => {
-    /* ... */
-  });
-```
-
-## 🔧 Scripts NPM
-
-```bash
-npm test          # Executar testes V2
-npm run demo      # Executar demo V2
-npm run examples  # Executar exemplos V2
-npm run health    # Verificar saúde V2
-```
-
-## 📚 Documentação Completa
-
-- 📖 **[Portal de Documentação](docs/README.md)** - Central de documentação
-- 🌟 **[Onboarding Completo](docs/onboarding.md)** - Guia gentil passo a passo
-- 🚀 **[Getting Started](docs/getting-started.md)** - Início rápido
-- 📚 **[API Reference](docs/api-reference.md)** - Documentação técnica
-- 👤💳 **[Tutorial User + Stripe](docs/tutorial-user-stripe-integration.md)** - Integração completa
-- 🧪 **[Exemplos Práticos](examples/README.md)** - Códigos prontos para usar
-
-## 🚀 Performance V2
-
-### **Melhorias**
-
-- ⚡ **30% mais rápido** para múltiplos matches
-- 📊 **Menor uso de memória** com cleanup automático
-- 🔄 **Melhor throughput** em cenários de alta concorrência
-- 🏗️ **Arquitetura simplificada** sem complexidade excessiva
-
-### **Benchmarks**
-
-```javascript
-// Executar 100 matches em paralelo
-const payloads = Array.from({ length: 100 }, (_, i) => ({ id: i }));
-const results = await engine.playMatches("benchmark", payloads, {
-  waitAll: true,
+// Executar todo mês via cron
+cron.schedule("0 2 1 * *", () => {
+  engine.playAndWait("monthly-billing", { month: new Date() });
 });
-console.log(`✅ ${results.length} matches completados`);
 ```
 
-## 🌐 Plataformas Suportadas
+### **📊 Analytics & Reports**
 
-- ✅ **Node.js** (tradicional)
-- ✅ **Vercel** (serverless)
-- ✅ **Netlify** (edge functions)
-- ✅ **Cloudflare Workers**
-- ✅ **Auto-detecção** e otimização
+```javascript
+// Dashboard executivo em tempo real
+const analytics = engine.createDeck("executive-dashboard");
 
-## 📝 Licença
+analytics
+  .addCard("collect-kpis", gatherBusinessMetrics)
+  .addCard("analyze-trends", calculateTrends)
+  .addCard("generate-alerts", checkThresholds)
+  .addCard("update-dashboard", refreshRealTimeDashboard);
 
-MIT - Veja [LICENSE](LICENSE) para detalhes.
+// Atualizar a cada 5 minutos
+setInterval(() => {
+  engine.playAndWait("executive-dashboard");
+}, 5 * 60 * 1000);
+```
 
-## 🤝 Contribuição
+## 🚀 **API REST Completa**
 
-Contribuições são bem-vindas! V2 está ativo e em desenvolvimento.
+### **🏥 System Endpoints**
+
+```bash
+GET  /api/system/health          # Health check
+GET  /api/system/status          # Status detalhado
+GET  /api/system/metrics         # Métricas em tempo real
+POST /api/system/cleanup         # Limpeza do sistema
+```
+
+### **🎮 Pipeline Management**
+
+```bash
+GET    /api/decks                # Listar pipelines
+POST   /api/decks                # Criar pipeline
+GET    /api/decks/{name}         # Obter pipeline
+DELETE /api/decks/{name}         # Remover pipeline
+POST   /api/decks/{name}/validate # Validar pipeline
+```
+
+### **⚔️ Execution Control**
+
+```bash
+POST /api/matches                # Executar pipeline
+POST /api/matches/batch          # Execução em lote
+GET  /api/matches/{id}           # Status da execução
+DELETE /api/matches/{id}         # Cancelar execução
+```
+
+### **📊 Business Analytics**
+
+```bash
+GET /api/analytics/dashboard     # Dashboard executivo
+GET /api/analytics/users         # Métricas de usuários
+GET /api/analytics/revenue       # Analytics financeiros
+GET /api/analytics/performance   # Performance do sistema
+```
+
+## 📚 **Documentação Completa**
+
+### **📖 Core Engine**
+
+- 🎮 **[Getting Started](docs/getting-started.md)** - Primeiros passos
+- 📚 **[API Reference](docs/api-reference.md)** - Referência completa
+- 🧪 **[Examples](examples/README.md)** - Exemplos práticos
+
+### **🚀 API Server**
+
+- 🏗️ **[Architecture](server/docs/ARCHITECTURE.md)** - Arquitetura técnica
+- 👥 **[Admin Guide](server/docs/ADMIN-GUIDE.md)** - Sistema administrativo
+- 💳 **[Billing Guide](server/docs/USER-BILLING-GUIDE.md)** - User management & billing
+- 🚀 **[Deployment](server/docs/DEPLOYMENT-GUIDE.md)** - Deploy em produção
+- 📈 **[Roadmap](server/docs/ROADMAP.md)** - Próximas funcionalidades
+
+### **🔗 Links Rápidos**
+
+- 📖 **Swagger UI**: `http://localhost:3000/api/docs`
+- 🏥 **Health Check**: `http://localhost:3000/api/system/health`
+- 📊 **System Status**: `http://localhost:3000/api/system/status`
+
+## 🧪 **Testes e Qualidade**
+
+### **Core Engine**
+
+```bash
+# Testes básicos
+npm test
+
+# Exemplos interativos
+node examples/simple-test.js
+```
+
+### **API Server**
+
+```bash
+cd server
+
+# Testes completos da API
+npm test
+
+# Teste de performance
+npm run benchmark
+```
+
+### **✅ Cobertura de Testes**
+
+- ✅ **Core Engine** - Criação/execução de pipelines
+- ✅ **API Endpoints** - Todos os endpoints testados
+- ✅ **Error Handling** - Cenários de erro validados
+- ✅ **Performance** - Benchmarks de response time
+- ✅ **Security** - Rate limiting e headers testados
+
+## 🚀 **Deploy em Produção**
+
+### **🐳 Docker**
+
+```bash
+# Build da imagem
+docker build -t deckengine .
+
+# Executar container
+docker run -p 3000:3000 \
+  -e NODE_ENV=production \
+  deckengine
+```
+
+### **☸️ Kubernetes**
+
+```bash
+# Deploy no cluster
+kubectl apply -f k8s/
+
+# Verificar status
+kubectl get pods -l app=deckengine
+```
+
+### **🌩️ Cloud Deploy**
+
+- ✅ **AWS** - ECS, EKS, Lambda
+- ✅ **Google Cloud** - Cloud Run, GKE
+- ✅ **Azure** - Container Instances, AKS
+- ✅ **Heroku** - Buildpack Node.js
+
+## 🔮 **Roadmap**
+
+### **✅ Fase Atual - Base Sólida**
+
+- ✅ Core engine estável
+- ✅ API REST completa
+- ✅ Documentação abrangente
+- ✅ Testes automatizados
+
+### **🛡️ Próxima Fase - Enterprise (4-6 semanas)**
+
+- 🔄 **Autenticação multi-tier** (API Key, JWT, Admin)
+- 🔄 **Persistência** (MongoDB + Redis)
+- 🔄 **Domain system** completo
+- 🔄 **Webhook management**
+- 🔄 **Advanced analytics**
+
+### **🏆 Futuro - Gaming Features (2-3 semanas)**
+
+- 🔄 **Tournament system** (batch processing gamificado)
+- 🔄 **Battle system** (comparar pipelines)
+- 🔄 **Achievement system** completo
+- 🔄 **Deck marketplace** (NFT-style)
+
+## 🤝 **Contribuição**
+
+### **🐛 Bug Reports**
+
+```bash
+# Criar issue com informações detalhadas
+curl -X POST https://api.github.com/repos/yourorg/deckengine/issues \
+  -d '{"title": "Bug description", "body": "Detailed info"}'
+```
+
+### **✨ Feature Requests**
+
+- Verifique o [roadmap](server/docs/ROADMAP.md) primeiro
+- Considere gaming metaphors
+- Explique caso de uso empresarial
+
+### **🔧 Development Setup**
+
+```bash
+# Clone e setup
+git clone https://github.com/yourorg/deckengine
+cd deckengine
+npm install
+
+# Core development
+npm run dev
+
+# API development
+cd server && npm run dev
+```
+
+## 📞 **Suporte**
+
+### **📧 Contato**
+
+- **Email**: support@pipesnow.com
+- **GitHub**: [Issues](https://github.com/yourorg/deckengine/issues)
+- **Documentation**: https://docs.pipesnow.com
+
+### **🆘 Suporte Empresarial**
+
+- 🏢 **Enterprise Support** - SLA 4h response time
+- 📞 **Phone Support** - Dedicated phone line
+- 👨‍💼 **Customer Success Manager** - Dedicated CSM
+- 🎓 **Training & Onboarding** - Team training sessions
 
 ---
 
-**Inspirado no Hearthstone** 🃏 - **DeckEngine V2: Pipelines Simples e Poderosos!** 🚀
+**🎮 DeckEngine - Where Pipelines Meet Gaming!**
 
-## ✨ Diferenças V2
+> _"Transforme operações complexas em pipelines simples e confiáveis, com a diversão dos jogos"_ ✨
 
-### **🎯 Foco em Simplicidade**
+### **🚀 Comece Agora**
 
-- Remoção de complexidade desnecessária
-- API mais limpa e intuitiva
-- Melhor experiência de desenvolvimento
+1. **Core Engine**: `npm install && node examples/simple-test.js`
+2. **API Server**: `cd server && npm start`
+3. **Documentação**: `open http://localhost:3000/api/docs`
+4. **Deploy**: Siga o [deployment guide](server/docs/DEPLOYMENT-GUIDE.md)
 
-### **🏗️ Arquitetura Melhorada**
-
-- Sistema de domains para organização
-- Logging unificado e configurável
-- Platform detection automático
-- Fallbacks inteligentes
-
-### **🚀 Novas Capacidades**
-
-- Múltiplas execuções com `playMatches()`
-- Aguardar matches específicos com `waitForMatch()`
-- Templates especializados via CLI
-- Health checks mais detalhados
-
-### **💪 100% Compatível**
-
-Todo código V1 funciona em V2 sem modificações!
-
----
-
-**🎮 DeckEngine V2** - A evolução natural dos pipelines assíncronos! 🎯
-
-## 🏗️ Arquitetura Modular
-
-O DeckEngine foi organizado em módulos especializados para facilitar manutenção e compreensão:
-
-```
-src/
-├── deck-engine.js    # 🎮 Core principal - orquestração de todos os sistemas
-├── deck.js          # 🎴 Sistema de Decks - criação e gerenciamento
-├── match.js         # ⚔️ Sistema de Partidas - execução e controle
-├── arena.js         # 🏟️ Sistema de Arenas - filas e concorrência
-├── metrics.js       # 📊 Sistema de Métricas - observabilidade
-├── events.js        # 🎯 Sistema de Eventos - comunicação
-└── utils.js         # 🛠️ Utilitários - funções auxiliares
-```
-
-**Benefícios da Modularização:**
-
-- ✅ **Clareza**: Cada módulo tem responsabilidade específica
-- ✅ **Manutenibilidade**: Mudanças isoladas por domínio
-- ✅ **Testabilidade**: Testes unitários por sistema
-- ✅ **Reutilização**: Módulos podem ser usados independentemente
-- ✅ **Sem perdas**: 100% das funcionalidades preservadas
-
-## 🎯 Conceitos Fundamentais
+**Ready to play? Let the games begin!** 🎯
