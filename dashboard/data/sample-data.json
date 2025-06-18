@@ -1,0 +1,19 @@
+{
+  "pipelines": [
+    {
+      "id": "welcome_pipeline",
+      "name": "Welcome Pipeline",
+      "description": "Pipeline de boas-vindas",
+      "cards": [
+        "validate",
+        "welcome",
+        "notify"
+      ]
+    }
+  ],
+  "user": {
+    "name": "Dev User",
+    "role": "admin",
+    "devMode": true
+  }
+}

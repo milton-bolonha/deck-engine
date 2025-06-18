@@ -4,19 +4,36 @@
   "description": "🎮 Sistema de pipelines assíncronos inspirado no Hearthstone - Deck = Pipeline, Card = Step, Match = Execução, Arena = Queue",
   "main": "index.js",
   "types": "index.d.ts",
+  "workspaces": [
+    "server",
+    "dashboard"
+  ],
   "bin": {
     "deck-engine": "./bin/deck-engine"
   },
   "scripts": {
     "start": "node examples/simple-test.js",
     "test": "node examples/test-v2.js",
-    "demo": "node examples/simple-test.js",
     "examples": "node examples/test-v2.js",
     "health": "node -e \"const DeckEngine = require('./index.js'); const engine = new DeckEngine(); console.log(JSON.stringify(engine.healthCheck(), null, 2));\"",
     "clean": "node -e \"const DeckEngine = require('./index.js'); const engine = new DeckEngine(); console.log(engine.cleanup());\"",
     "prepublishOnly": "npm test",
     "prepack": "echo 'Preparando pacote para publicação...'",
-    "postpack": "echo 'Pacote preparado com sucesso!'"
+    "postpack": "echo 'Pacote preparado com sucesso!'",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:dashboard\"",
+    "dev:server": "npm run dev --workspace=server",
+    "dev:dashboard": "npm run dev --workspace=dashboard",
+    "start:server": "npm run start --workspace=server",
+    "start:dashboard": "npm run start --workspace=dashboard",
+    "start:full": "concurrently \"npm run start:server\" \"npm run start:dashboard\"",
+    "build": "npm run build --workspaces",
+    "test:all": "npm run test --workspaces",
+    "setup": "npm install && npm run setup --workspaces",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "workspace": "npm run",
+    "demo": "node scripts/demo-integration.js",
+    "status": "node scripts/demo-integration.js"
   },
   "keywords": [
     "pipeline",
@@ -73,7 +90,9 @@
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
   "dependencies": {},
   "peerDependencies": {},
   "optionalDependencies": {}
