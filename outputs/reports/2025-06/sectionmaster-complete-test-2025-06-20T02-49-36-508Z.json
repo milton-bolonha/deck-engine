@@ -1,0 +1,13 @@
+{
+  "timestamp": "2025-06-20T02:49:23.226Z",
+  "testsRun": 3,
+  "testsPassed": 2,
+  "testsFailed": 1,
+  "details": [
+    "✅ Dashboard carregado com sucesso",
+    "✅ SectionMaster encontrado no menu",
+    "✅ SectionMaster container carregado",
+    "❌ Erro: locator.isVisible: Error: strict mode violation: locator('text=Dashboard') resolved to 2 elements:\n    1) <div class=\"call-stack-frame-method-name\">…</div> aka getByText('DashboardLayout', { exact: true })\n    2) <span data-has-source=\"true\" class=\"call-stack-frame-file-source\">components\\layout\\DashboardLayout.js (50:13)</span> aka getByText('components\\\\layout\\\\DashboardLayout.js (50:13)')\n\nCall log:\n\u001b[2m    - checking visibility of locator('text=Dashboard')\u001b[22m\n"
+  ],
+  "checklist": {}
+}

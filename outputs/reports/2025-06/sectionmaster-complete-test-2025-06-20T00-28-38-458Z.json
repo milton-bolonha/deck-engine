@@ -1,0 +1,25 @@
+{
+  "timestamp": "2025-06-20T00:28:31.547Z",
+  "testsRun": 7,
+  "testsPassed": 0,
+  "testsFailed": 7,
+  "details": [
+    "❌ Dashboard não carregou",
+    "❌ SectionMaster não encontrado no menu",
+    "❌ Botão Nova Seção não encontrado",
+    "❌ Configurações de seção não disponíveis",
+    "❌ Sistema de Elementos não disponível",
+    "❌ Seção Usuários não encontrada",
+    "❌ DevMode não detectado"
+  ],
+  "checklist": {
+    "SectionMaster no menu principal": false,
+    "Layouts expandidos (Kanban, Canvas, Feed, Gallery)": false,
+    "Sistema de Addons administrativos": false,
+    "Elementos customizáveis": true,
+    "CRUD funcional": false,
+    "DevMode ativo": true,
+    "Interface unificada": false
+  },
+  "screenshot": "outputs/screenshots/2025-06/sectionmaster-complete-test-2025-06-20T00-28-37-868Z.png"
+}

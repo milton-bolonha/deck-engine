@@ -2,68 +2,50 @@
 
 import { useDashboard } from "../../contexts/DashboardContext";
 
-// Import section containers
-import OverviewContainer from "../../containers/OverviewContainer";
-import PipelineBuilderContainer from "../../containers/PipelineBuilderContainer";
-import LiveExecutionContainer from "../../containers/LiveExecutionContainer";
-import PipelineLibraryContainer from "../../containers/PipelineLibraryContainer";
-import UserManagementContainer from "../../containers/UserManagementContainer";
-import BillingContainer from "../../containers/BillingContainer";
-import AnalyticsContainer from "../../containers/AnalyticsContainer";
-import AnalyticsProContainer from "../../containers/AnalyticsProContainer";
-import AutomationContainer from "../../containers/AutomationContainer";
-import AddonsContainer from "../../containers/AddonsContainer";
-import ProvidersContainer from "../../containers/ProvidersContainer";
-import MetaAdminContainer from "../../containers/MetaAdminContainer";
+// Import unified section system
+import DynamicSectionContainer from "./DynamicSectionContainer";
 import DevToolsContainer from "../../containers/DevToolsContainer";
+import SectionMasterContainer from "../../containers/SectionMasterContainer";
 
 export default function MainContent() {
   const { state } = useDashboard();
 
   const renderSection = () => {
-    switch (state.selectedSection) {
-      case "overview":
-        return <OverviewContainer />;
+    const selectedSection = state.selectedSection || "overview"; // Fallback para overview
+    console.log(`🎯 MainContent renderizando seção: "${selectedSection}"`);
+    console.log(`🎯 Tipo: ${typeof selectedSection}`);
+    console.log(
+      `🎯 selectedSection === "sectionmaster": ${
+        selectedSection === "sectionmaster"
+      }`
+    );
+    console.log(`🎯 State completo:`, {
+      selectedSection: state.selectedSection,
+      devMode: state.devMode,
+      sectionManagerInitialized: state.sectionManager?.initialized,
+    });
 
-      case "pipelines":
-        return <PipelineBuilderContainer />;
-
-      case "execution":
-        return <LiveExecutionContainer />;
-
-      case "library":
-        return <PipelineLibraryContainer />;
-
-      case "users":
-        return <UserManagementContainer />;
-
-      case "billing":
-        return <BillingContainer />;
-
-      case "analytics":
-        return <AnalyticsContainer />;
-
-      case "analytics_pro":
-        return <AnalyticsProContainer />;
-
-      case "automation":
-        return <AutomationContainer />;
-
-      case "addons":
-        return <AddonsContainer />;
-
-      case "providers":
-        return <ProvidersContainer />;
-
-      case "meta_admin":
-        return <MetaAdminContainer />;
-
-      case "devtools":
-        return <DevToolsContainer />;
-
-      default:
-        return <OverviewContainer />;
+    // Casos especiais primeiro
+    if (selectedSection === "sectionmaster") {
+      console.log(`🔧 ✅ Renderizando SectionMasterContainer`);
+      return <SectionMasterContainer isDevMode={state.devMode} />;
     }
+
+    if (selectedSection === "devtools") {
+      console.log(`🛠️ ✅ Renderizando DevToolsContainer`);
+      return <DevToolsContainer />;
+    }
+
+    // Para todas as outras seções, usar DynamicSectionContainer
+    console.log(
+      `📦 ✅ Renderizando DynamicSectionContainer para: ${selectedSection}`
+    );
+    return (
+      <DynamicSectionContainer
+        sectionId={selectedSection}
+        isDevMode={state.devMode}
+      />
+    );
   };
 
   return (

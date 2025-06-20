@@ -1,0 +1,37 @@
+{
+  "timestamp": "2025-06-20T02:38:36.644Z",
+  "diagnostics": {
+    "url": "http://localhost:3001/",
+    "hasMainContent": false,
+    "hasSectionMasterTitle": false,
+    "hasSectionsList": true,
+    "hasCreateButton": true,
+    "totalElements": 198,
+    "bodyClasses": "__className_e8ce0c bg-gray-50 dark:bg-deck-bg",
+    "allH1s": [
+      "DeckEngine",
+      "SectionMaster"
+    ],
+    "allButtons": [
+      "Overview",
+      "Pipeline Builder",
+      "Usuários",
+      "Faturamento",
+      "SectionMaster",
+      "Debug Tools",
+      "Nova Seção",
+      "",
+      "",
+      ""
+    ],
+    "hasRightSidebar": false,
+    "errorElements": [],
+    "isLoading": false
+  },
+  "logs": [],
+  "success": false,
+  "issues": [
+    "Main content não encontrado",
+    "Título SectionMaster não encontrado"
+  ]
+}

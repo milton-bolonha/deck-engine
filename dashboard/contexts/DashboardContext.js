@@ -3,6 +3,7 @@
 import { createContext, useContext, useReducer, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import io from "socket.io-client";
+import { getSectionManager } from "../utils/SectionManager";
 
 // Initial state
 const initialState = {
@@ -10,7 +11,12 @@ const initialState = {
   pipelines: [],
   activeMatches: [],
   pipelineMetrics: {},
-  systemHealth: {},
+  systemHealth: {
+    status: "unknown",
+    uptime: 0,
+    memory: { used: 0, total: 0 },
+    cpu: 0,
+  },
 
   // UI state
   selectedSection: "overview",
@@ -25,19 +31,29 @@ const initialState = {
 
   // Provider configurations
   providers: {
-    auth: { type: "clerk", config: {}, connected: false },
-    payment: { type: "stripe", config: {}, connected: false },
-    storage: { type: "memory", config: {}, connected: true },
-    media: { type: "cloudinary", config: {}, connected: false },
+    stripe: { configured: false, enabled: false },
+    discord: { configured: false, enabled: false },
+    twitch: { configured: false, enabled: false },
   },
 
   // User & permissions
   user: null,
   userRoles: [],
   userAddons: [],
+  userPlan: "tier3",
+  currentPlan: "tier3",
 
-  // Dev mode
+  // SectionMaster Enhanced
+  sectionManager: null,
+  currentSectionData: [],
+  sectionData: {},
+  selectedItem: null,
+  selectedElement: null,
+  currentSection: null,
+
+  // Dev mode vs underConstruction
   devMode: process.env.NODE_ENV === "development",
+  underConstruction: false,
   debugData: {},
 };
 
@@ -79,6 +95,23 @@ const actionTypes = {
   SET_SYSTEM_HEALTH: "SET_SYSTEM_HEALTH",
   SET_PIPELINE_METRICS: "SET_PIPELINE_METRICS",
   SET_DEBUG_DATA: "SET_DEBUG_DATA",
+
+  // SectionMaster actions
+  SET_SECTION_MANAGER: "SET_SECTION_MANAGER",
+  SET_CURRENT_SECTION_DATA: "SET_CURRENT_SECTION_DATA",
+  SET_DEV_MODE: "SET_DEV_MODE",
+  SET_UNDER_CONSTRUCTION: "SET_UNDER_CONSTRUCTION",
+
+  // Enhanced SectionMaster actions
+  SET_RIGHT_SIDEBAR_CONTENT: "SET_RIGHT_SIDEBAR_CONTENT",
+  SET_SELECTED_ITEM: "SET_SELECTED_ITEM",
+  SET_SELECTED_ELEMENT: "SET_SELECTED_ELEMENT",
+  SET_CURRENT_SECTION: "SET_CURRENT_SECTION",
+  SET_SECTION_DATA: "SET_SECTION_DATA",
+  UPDATE_ITEM: "UPDATE_ITEM",
+  UPDATE_SECTION_ADDONS: "UPDATE_SECTION_ADDONS",
+  UPDATE_SECTION_ELEMENTS: "UPDATE_SECTION_ELEMENTS",
+  SELECT_ELEMENT: "SELECT_ELEMENT",
 };
 
 // Reducer function
@@ -133,6 +166,7 @@ function dashboardReducer(state, action) {
       };
 
     case actionTypes.SET_SELECTED_SECTION:
+      console.log(`🎯 REDUCER: Mudando seção para ${action.payload}`);
       return {
         ...state,
         selectedSection: action.payload,
@@ -191,6 +225,73 @@ function dashboardReducer(state, action) {
         debugData: { ...state.debugData, ...action.payload },
       };
 
+    // SectionMaster cases
+    case actionTypes.SET_SECTION_MANAGER:
+      return { ...state, sectionManager: action.payload };
+
+    case actionTypes.SET_CURRENT_SECTION_DATA:
+      return { ...state, currentSectionData: action.payload };
+
+    case actionTypes.SET_DEV_MODE:
+      return { ...state, devMode: action.payload };
+
+    case actionTypes.SET_UNDER_CONSTRUCTION:
+      return { ...state, underConstruction: action.payload };
+
+    // Enhanced SectionMaster cases
+    case actionTypes.SET_RIGHT_SIDEBAR_CONTENT:
+      return { ...state, rightSidebarContent: action.payload };
+
+    case actionTypes.SET_SELECTED_ITEM:
+      return { ...state, selectedItem: action.payload };
+
+    case actionTypes.SET_SELECTED_ELEMENT:
+      return { ...state, selectedElement: action.payload };
+
+    case actionTypes.SET_CURRENT_SECTION:
+      return { ...state, currentSection: action.payload };
+
+    case actionTypes.SET_SECTION_DATA:
+      return {
+        ...state,
+        sectionData: {
+          ...state.sectionData,
+          [action.payload.sectionId]: action.payload.data,
+        },
+      };
+
+    case actionTypes.UPDATE_ITEM:
+      return { ...state, selectedItem: action.payload.item };
+
+    case actionTypes.UPDATE_SECTION_ADDONS:
+      const { sectionId: addonSectionId, addons } = action.payload;
+      return {
+        ...state,
+        sectionData: {
+          ...state.sectionData,
+          [`${addonSectionId}_addons`]: addons,
+        },
+      };
+
+    case actionTypes.UPDATE_SECTION_ELEMENTS:
+      const { sectionId: elementSectionId, elements } = action.payload;
+      return {
+        ...state,
+        sectionData: {
+          ...state.sectionData,
+          [`${elementSectionId}_elements`]: elements,
+        },
+      };
+
+    case actionTypes.SELECT_ELEMENT:
+      return {
+        ...state,
+        selectedElement: action.payload.element,
+        rightSidebarContent: action.payload.element
+          ? "element-config"
+          : "default",
+      };
+
     default:
       return state;
   }
@@ -205,12 +306,55 @@ export function useDashboard() {
   if (!context) {
     throw new Error("useDashboard must be used within a DashboardProvider");
   }
+
+  // Debug: verificar se dispatch está presente (apenas log de erro)
+  if (!context.dispatch) {
+    console.error(
+      "❌ useDashboard: dispatch não está presente no contexto",
+      context
+    );
+  }
+
   return context;
 }
 
 // Provider component
 export function DashboardProvider({ children }) {
   const [state, dispatch] = useReducer(dashboardReducer, initialState);
+
+  // Initialize SectionManager
+  useEffect(() => {
+    const initSectionManager = async () => {
+      const sectionManager = getSectionManager();
+
+      try {
+        console.log("🎯 Iniciando SectionManager...");
+
+        // Set configuration first
+        sectionManager.setDevMode(true);
+        sectionManager.setUnderConstruction(false);
+        sectionManager.setUserPlan("tier3");
+
+        // Then initialize
+        await sectionManager.initialize();
+
+        dispatch({
+          type: actionTypes.SET_SECTION_MANAGER,
+          payload: sectionManager,
+        });
+
+        console.log("🎯 SectionManager integrado ao DashboardContext");
+        console.log(
+          "📊 Seções disponíveis:",
+          sectionManager.getAccessibleSections().length
+        );
+      } catch (error) {
+        console.error("❌ Erro ao inicializar SectionManager:", error);
+      }
+    };
+
+    initSectionManager();
+  }, []);
 
   // Socket.IO connection for real-time updates
   useEffect(() => {
@@ -364,7 +508,34 @@ export function DashboardProvider({ children }) {
 
     // UI actions
     setSelectedSection(section) {
+      console.log(`🎯 ACTION: Navegando para seção: ${section}`);
       dispatch({ type: actionTypes.SET_SELECTED_SECTION, payload: section });
+
+      // Carregar dados da seção automaticamente
+      if (state.sectionManager?.initialized) {
+        try {
+          console.log(
+            `📊 SectionManager disponível, carregando dados para: ${section}`
+          );
+          const data = state.sectionManager.getSectionData(section);
+          dispatch({
+            type: actionTypes.SET_CURRENT_SECTION_DATA,
+            payload: data,
+          });
+          console.log(
+            `📊 Dados carregados para ${section}:`,
+            data?.length || 0,
+            "itens"
+          );
+        } catch (error) {
+          console.error(
+            `❌ Erro ao carregar dados da seção ${section}:`,
+            error
+          );
+        }
+      } else {
+        console.log(`⚠️ SectionManager não inicializado ainda`);
+      }
     },
 
     setSelectedPipeline(pipeline) {
@@ -385,6 +556,26 @@ export function DashboardProvider({ children }) {
 
     setRightSidebar(content) {
       dispatch({ type: actionTypes.SET_RIGHT_SIDEBAR, payload: content });
+    },
+
+    // Enhanced actions for RightSidebar
+    setRightSidebarContent(content) {
+      dispatch({
+        type: actionTypes.SET_RIGHT_SIDEBAR_CONTENT,
+        payload: content,
+      });
+    },
+
+    setSelectedItem(item) {
+      dispatch({ type: actionTypes.SET_SELECTED_ITEM, payload: item });
+    },
+
+    setSelectedElement(element) {
+      dispatch({ type: actionTypes.SET_SELECTED_ELEMENT, payload: element });
+    },
+
+    setCurrentSection(section) {
+      dispatch({ type: actionTypes.SET_CURRENT_SECTION, payload: section });
     },
 
     setIsCreating(isCreating) {
@@ -426,11 +617,44 @@ export function DashboardProvider({ children }) {
     updateProvider(type, data) {
       dispatch({ type: actionTypes.UPDATE_PROVIDER, payload: { type, data } });
     },
+
+    // SectionMaster actions
+    loadSectionData(sectionId) {
+      if (state.sectionManager) {
+        const data = state.sectionManager.getSectionData(sectionId);
+        dispatch({ type: actionTypes.SET_CURRENT_SECTION_DATA, payload: data });
+        console.log(`📊 Loaded data for section: ${sectionId}`, data);
+      }
+    },
+
+    toggleDevMode() {
+      const newDevMode = !state.devMode;
+      dispatch({ type: actionTypes.SET_DEV_MODE, payload: newDevMode });
+      if (state.sectionManager) {
+        state.sectionManager.setDevMode(newDevMode);
+      }
+      toast.success(`DevMode ${newDevMode ? "ativado" : "desativado"}`);
+    },
+
+    toggleUnderConstruction() {
+      const newUnderConstruction = !state.underConstruction;
+      dispatch({
+        type: actionTypes.SET_UNDER_CONSTRUCTION,
+        payload: newUnderConstruction,
+      });
+      if (state.sectionManager) {
+        state.sectionManager.setUnderConstruction(newUnderConstruction);
+      }
+      toast.success(
+        `UnderConstruction ${newUnderConstruction ? "ativado" : "desativado"}`
+      );
+    },
   };
 
   // Context value
   const value = {
     state,
+    dispatch,
     actions,
     api,
   };

@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-06-20T00:34:10.376Z",
+  "testsRun": 2,
+  "testsPassed": 1,
+  "testsFailed": 1,
+  "details": [
+    "✅ Dashboard carregado com sucesso",
+    "❌ Erro: locator.isVisible: Error: strict mode violation: locator('text=SectionMaster') resolved to 2 elements:\n    1) <span>SectionMaster</span> aka getByRole('button', { name: ' SectionMaster' })\n    2) <span>SectionMaster</span> aka getByRole('button', { name: ' SectionMaster ' })\n\nCall log:\n\u001b[2m    - checking visibility of locator('text=SectionMaster')\u001b[22m\n"
+  ],
+  "checklist": {}
+}

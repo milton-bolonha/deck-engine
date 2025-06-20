@@ -1,9 +1,10 @@
 "use client";
 
 import { useDashboard } from "../contexts/DashboardContext";
+import SectionBuilder from "../components/forms/SectionBuilder";
 
 export default function MetaAdminContainer() {
-  const { state } = useDashboard();
+  const { state, actions } = useDashboard();
 
   return (
     <div className="p-6 space-y-6">
@@ -34,7 +35,15 @@ export default function MetaAdminContainer() {
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
             Crie novas seções personalizadas para o dashboard
           </p>
-          <button className="btn-primary text-sm w-full">
+          <button
+            onClick={() =>
+              actions.setRightSidebar({
+                type: "section-builder",
+                data: {},
+              })
+            }
+            className="btn-primary text-sm w-full"
+          >
             <i className="fas fa-plus mr-2"></i>
             New Section
           </button>

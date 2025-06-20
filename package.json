@@ -1,109 +1,101 @@
 {
-    "name":  "deck-engine",
-    "version":  "0.1.0",
-    "description":  "🎮 Sistema de pipelines assíncronos inspirado no Hearthstone - Deck = Pipeline, Card = Step, Match = Execução, Arena = Queue",
-    "main":  "index.js",
-    "types":  "index.d.ts",
-    "workspaces":  [
-                       "server",
-                       "dashboard",
-                       ".ai"
-                   ],
-    "bin":  {
-                "deck-engine":  "./bin/deck-engine"
-            },
-    "scripts":  {
-                    "start":  "node docs/examples/simple-test.js",
-                    "test":  "node docs/examples/test-v2.js",
-                    "examples":  "node docs/examples/test-v2.js",
-                    "health":  "node -e \"const DeckEngine = require(\u0027./index.js\u0027); const engine = new DeckEngine(); console.log(JSON.stringify(engine.healthCheck(), null, 2));\"",
-                    "clean":  "node -e \"const DeckEngine = require(\u0027./index.js\u0027); const engine = new DeckEngine(); console.log(engine.cleanup());\"",
-                    "prepublishOnly":  "npm test",
-                    "prepack":  "echo \u0027Preparando pacote para publicação...\u0027",
-                    "postpack":  "echo \u0027Pacote preparado com sucesso!\u0027",
-                    "dev":  "concurrently \"npm run dev:server\" \"npm run dev:dashboard\"",
-                    "dev:server":  "npm run dev --workspace=server",
-                    "dev:dashboard":  "npm run dev --workspace=dashboard",
-                    "start:server":  "npm run start --workspace=server",
-                    "start:dashboard":  "npm run start --workspace=dashboard",
-                    "start:full":  "concurrently \"npm run start:server\" \"npm run start:dashboard\"",
-                    "build":  "npm run build --workspaces",
-                    "test:all":  "npm run test --workspaces",
-                    "setup":  "npm install \u0026\u0026 npm run setup --workspaces",
-                    "docker:up":  "docker-compose up -d",
-                    "docker:down":  "docker-compose down",
-                    "workspace":  "npm run",
-                    "demo":  "node docs/examples/demo-integration.js",
-                    "status":  "node docs/examples/demo-integration.js",
-                    "ai:setup":  "npm install --workspace=.ai",
-                    "ai:health":  "npm run health-insight --workspace=.ai",
-                    "ai:visual":  "npm run visual-check --workspace=.ai",
-                    "ai:test":  "npm run test --workspace=.ai"
-                },
-    "keywords":  [
-                     "pipeline",
-                     "workflow",
-                     "orchestration",
-                     "async",
-                     "queue",
-                     "hearthstone",
-                     "deck",
-                     "cards",
-                     "gaming",
-                     "task-runner",
-                     "job-queue",
-                     "automation",
-                     "nodejs",
-                     "javascript",
-                     "concurrent",
-                     "parallel",
-                     "scheduler",
-                     "executor"
-                 ],
-    "author":  {
-                   "name":  "DeckEngine Team",
-                   "email":  "team@deckengine.dev",
-                   "url":  "https://github.com/your-org/deck-engine"
-               },
-    "license":  "MIT",
-    "repository":  {
-                       "type":  "git",
-                       "url":  "git+https://github.com/your-org/deck-engine.git"
-                   },
-    "bugs":  {
-                 "url":  "https://github.com/your-org/deck-engine/issues"
-             },
-    "homepage":  "https://github.com/your-org/deck-engine#readme",
-    "engines":  {
-                    "node":  "\u003e=14.0.0",
-                    "npm":  "\u003e=6.0.0"
-                },
-    "files":  [
-                  "index.js",
-                  "core/",
-                  "bin/",
-                  "docs/examples/",
-                  "index.d.ts",
-                  "README.md",
-                  "LICENSE"
-              ],
-    "directories":  {
-                        "lib":  "src"
-                    },
-    "publishConfig":  {
-                          "access":  "public",
-                          "registry":  "https://registry.npmjs.org/"
-                      },
-    "devDependencies":  {
-                            "concurrently":  "^8.2.2"
-                        },
-    "dependencies":  {
-
-                     },
-    "peerDependencies":  {
-
-                         },
-    "optionalDependencies":  {
-
-                             }
+    "name": "deck-engine",
+    "version": "0.1.0",
+    "description": "🎮 Sistema de pipelines assíncronos inspirado no Hearthstone - Deck = Pipeline, Card = Step, Match = Execução, Arena = Queue",
+    "main": "index.js",
+    "types": "index.d.ts",
+    "workspaces": [
+        "server",
+        "dashboard",
+        ".ai"
+    ],
+    "bin": {
+        "deck-engine": "./bin/deck-engine"
+    },
+    "scripts": {
+        "start": "node docs/examples/simple-test.js",
+        "test": "node docs/examples/test-v2.js",
+        "examples": "node docs/examples/test-v2.js",
+        "health": "node -e \"const DeckEngine = require('./index.js'); const engine = new DeckEngine(); console.log(JSON.stringify(engine.healthCheck(), null, 2));\"",
+        "clean": "node -e \"const DeckEngine = require('./index.js'); const engine = new DeckEngine(); console.log(engine.cleanup());\"",
+        "prepublishOnly": "npm test",
+        "prepack": "echo 'Preparando pacote para publicação...'",
+        "postpack": "echo 'Pacote preparado com sucesso!'",
+        "dev": "concurrently \"npm run dev:server\" \"npm run dev:dashboard\"",
+        "dev:server": "npm run dev --workspace=server",
+        "dev:dashboard": "npm run dev --workspace=dashboard",
+        "start:server": "npm run start --workspace=server",
+        "start:dashboard": "npm run start --workspace=dashboard",
+        "start:full": "concurrently \"npm run start:server\" \"npm run start:dashboard\"",
+        "build": "npm run build --workspaces",
+        "test:all": "npm run test --workspaces",
+        "setup": "npm install && npm run setup --workspaces",
+        "docker:up": "docker-compose up -d",
+        "docker:down": "docker-compose down",
+        "workspace": "npm run",
+        "demo": "node docs/examples/demo-integration.js",
+        "status": "node docs/examples/demo-integration.js",
+        "ai:setup": "npm install --workspace=.ai",
+        "ai:health": "npm run health-insight --workspace=.ai",
+        "ai:visual": "npm run visual-check --workspace=.ai",
+        "ai:test": "npm run test --workspace=.ai"
+    },
+    "keywords": [
+        "pipeline",
+        "workflow",
+        "orchestration",
+        "async",
+        "queue",
+        "hearthstone",
+        "deck",
+        "cards",
+        "gaming",
+        "task-runner",
+        "job-queue",
+        "automation",
+        "nodejs",
+        "javascript",
+        "concurrent",
+        "parallel",
+        "scheduler",
+        "executor"
+    ],
+    "author": {
+        "name": "DeckEngine Team",
+        "email": "team@deckengine.dev",
+        "url": "https://github.com/your-org/deck-engine"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/your-org/deck-engine.git"
+    },
+    "bugs": {
+        "url": "https://github.com/your-org/deck-engine/issues"
+    },
+    "homepage": "https://github.com/your-org/deck-engine#readme",
+    "engines": {
+        "node": ">=14.0.0",
+        "npm": ">=6.0.0"
+    },
+    "files": [
+        "index.js",
+        "core/",
+        "bin/",
+        "docs/examples/",
+        "index.d.ts",
+        "README.md",
+        "LICENSE"
+    ],
+    "directories": {
+        "lib": "src"
+    },
+    "publishConfig": {
+        "access": "public",
+        "registry": "https://registry.npmjs.org/"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2",
+        "playwright": "^1.53.1"
+    }
 }
