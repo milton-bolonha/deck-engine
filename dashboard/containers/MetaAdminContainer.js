@@ -1,7 +1,7 @@
 "use client";
 
 import { useDashboard } from "../contexts/DashboardContext";
-import SectionBuilder from "../components/forms/SectionBuilder";
+import SectionBuilder from "../components/builders/SectionBuilder";
 
 export default function MetaAdminContainer() {
   const { state, actions } = useDashboard();

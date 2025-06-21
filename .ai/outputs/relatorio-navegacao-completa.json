@@ -1,0 +1,32 @@
+{
+  "timestamp": "2025-06-21T00:16:24.853Z",
+  "success": true,
+  "tests": {
+    "dashboardLoaded": true,
+    "sectionMasterFound": true,
+    "createButtonFound": true,
+    "rightSidebarActive": true,
+    "sectionsAvailable": 6
+  },
+  "sectionLinks": [
+    "Blog",
+    "Overview",
+    "Pipeline Builder",
+    "Usuários",
+    "Faturamento",
+    "Debug Tools"
+  ],
+  "rightSidebarContent": "ConfiguraçõesSection BuilderNova SeçãoCriar uma nova seção personalizadaInformações BásicasID da Seç",
+  "logs": [
+    "[log] 🎯 MainContent renderizando seção: \"blog\"",
+    "[log] 🎯 Tipo: string",
+    "[log] 🎯 selectedSection === \"sectionmaster\": false",
+    "[log] 🎯 State completo: JSHandle@object",
+    "[log] 📦 ✅ Renderizando DynamicSectionContainer para: blog",
+    "[log] 🎯 MainContent renderizando seção: \"blog\"",
+    "[log] 🎯 Tipo: string",
+    "[log] 🎯 selectedSection === \"sectionmaster\": false",
+    "[log] 🎯 State completo: JSHandle@object",
+    "[log] 📦 ✅ Renderizando DynamicSectionContainer para: blog"
+  ]
+}

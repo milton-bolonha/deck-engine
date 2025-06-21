@@ -506,36 +506,273 @@ export function DashboardProvider({ children }) {
       }
     },
 
-    // UI actions
-    setSelectedSection(section) {
-      console.log(`🎯 ACTION: Navegando para seção: ${section}`);
-      dispatch({ type: actionTypes.SET_SELECTED_SECTION, payload: section });
+    // ===== ITEM ACTIONS - IMPLEMENTAÇÃO SIMPLES E FUNCIONAL =====
 
-      // Carregar dados da seção automaticamente
-      if (state.sectionManager?.initialized) {
+    async saveItem(sectionId, itemData) {
+      try {
+        console.log(
+          `💾 [SIMPLES] Salvando item na seção ${sectionId}:`,
+          itemData
+        );
+
+        // Storage simples usando localStorage diretamente
+        const storageKey = `pipesnow_${sectionId}_items`;
+
+        // Obter dados atuais
+        let currentData = [];
         try {
-          console.log(
-            `📊 SectionManager disponível, carregando dados para: ${section}`
+          const stored = localStorage.getItem(storageKey);
+          if (stored) {
+            currentData = JSON.parse(stored);
+          }
+        } catch (e) {
+          console.warn("Erro ao carregar dados existentes:", e);
+        }
+
+        let updatedData;
+
+        if (
+          itemData.id &&
+          currentData.find((item) => item.id === itemData.id)
+        ) {
+          // Atualizar item existente
+          updatedData = currentData.map((item) =>
+            item.id === itemData.id ? itemData : item
           );
-          const data = state.sectionManager.getSectionData(section);
+          console.log(`✏️ Item ${itemData.id} atualizado`);
+        } else {
+          // Criar novo item
+          const newItem = {
+            ...itemData,
+            id: itemData.id || Date.now().toString(),
+            createdAt: itemData.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          updatedData = [...currentData, newItem];
+          console.log(`➕ Novo item criado:`, newItem.id);
+        }
+
+        // Salvar diretamente no localStorage
+        localStorage.setItem(storageKey, JSON.stringify(updatedData));
+        console.log(`💾 Dados salvos no localStorage para ${sectionId}`);
+
+        // Atualizar state do React
+        dispatch({
+          type: actionTypes.SET_SECTION_DATA,
+          payload: { sectionId, data: updatedData },
+        });
+
+        toast.success("✅ Item salvo com sucesso!");
+        return itemData;
+      } catch (error) {
+        console.error("❌ Erro ao salvar item:", error);
+        toast.error("Erro ao salvar item");
+        throw error;
+      }
+    },
+
+    async deleteItem(sectionId, itemId) {
+      try {
+        console.log(
+          `🗑️ [SIMPLES] Removendo item ${itemId} da seção ${sectionId}`
+        );
+
+        const storageKey = `pipesnow_${sectionId}_items`;
+
+        // Obter dados atuais
+        let currentData = [];
+        try {
+          const stored = localStorage.getItem(storageKey);
+          if (stored) {
+            currentData = JSON.parse(stored);
+          }
+        } catch (e) {
+          console.warn("Erro ao carregar dados:", e);
+        }
+
+        const updatedData = currentData.filter((item) => item.id !== itemId);
+
+        // Salvar no localStorage
+        localStorage.setItem(storageKey, JSON.stringify(updatedData));
+
+        // Atualizar state
+        dispatch({
+          type: actionTypes.SET_SECTION_DATA,
+          payload: { sectionId, data: updatedData },
+        });
+
+        toast.success("🗑️ Item removido com sucesso!");
+      } catch (error) {
+        console.error("❌ Erro ao remover item:", error);
+        toast.error("Erro ao remover item");
+        throw error;
+      }
+    },
+
+    // Carregar dados de uma seção do localStorage
+    loadSectionData(sectionId) {
+      try {
+        const storageKey = `pipesnow_${sectionId}_items`;
+        const stored = localStorage.getItem(storageKey);
+
+        if (stored) {
+          const data = JSON.parse(stored);
           dispatch({
-            type: actionTypes.SET_CURRENT_SECTION_DATA,
-            payload: data,
+            type: actionTypes.SET_SECTION_DATA,
+            payload: { sectionId, data },
           });
           console.log(
-            `📊 Dados carregados para ${section}:`,
-            data?.length || 0,
+            `📊 [SIMPLES] Dados carregados para ${sectionId}:`,
+            data.length,
             "itens"
           );
-        } catch (error) {
-          console.error(
-            `❌ Erro ao carregar dados da seção ${section}:`,
-            error
-          );
+          return data;
         }
-      } else {
-        console.log(`⚠️ SectionManager não inicializado ainda`);
+
+        // Dados padrão se não existirem
+        const defaultData = this.getDefaultSectionData(sectionId);
+        dispatch({
+          type: actionTypes.SET_SECTION_DATA,
+          payload: { sectionId, data: defaultData },
+        });
+
+        // Salvar dados padrão no localStorage para próxima vez
+        localStorage.setItem(storageKey, JSON.stringify(defaultData));
+
+        return defaultData;
+      } catch (error) {
+        console.error(
+          `❌ Erro ao carregar dados da seção ${sectionId}:`,
+          error
+        );
+        return [];
       }
+    },
+
+    // Dados padrão para seções
+    getDefaultSectionData(sectionId) {
+      const defaultData = {
+        blog: [
+          {
+            id: "post-default-1",
+            title: "Primeiro Post",
+            content: "Este é o primeiro post do blog...",
+            status: "published",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+        ],
+        users: [
+          {
+            id: "user-default-1",
+            name: "Admin User",
+            email: "admin@example.com",
+            role: "admin",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+        ],
+        overview: [],
+      };
+
+      return defaultData[sectionId] || [];
+    },
+
+    // Obter ContentType simples para uma seção
+    getSimpleContentType(sectionId) {
+      const contentTypes = {
+        blog: {
+          id: "post",
+          name: "Post do Blog",
+          icon: "fas fa-newspaper",
+          fields: {
+            title: { type: "text", required: true, label: "Título" },
+            content: { type: "wysiwyg", required: true, label: "Conteúdo" },
+            status: {
+              type: "select",
+              options: ["draft", "published"],
+              default: "draft",
+              label: "Status",
+            },
+          },
+        },
+        users: {
+          id: "user",
+          name: "Usuário",
+          icon: "fas fa-user",
+          fields: {
+            name: { type: "text", required: true, label: "Nome" },
+            email: { type: "email", required: true, label: "E-mail" },
+            role: {
+              type: "select",
+              options: ["admin", "editor", "user"],
+              default: "user",
+              label: "Função",
+            },
+          },
+        },
+        overview: {
+          id: "dashboard",
+          name: "Dashboard Item",
+          icon: "fas fa-tachometer-alt",
+          fields: {
+            title: { type: "text", required: true, label: "Título" },
+          },
+        },
+      };
+
+      return (
+        contentTypes[sectionId] || {
+          id: "generic",
+          name: "Item Genérico",
+          icon: "fas fa-file",
+          fields: {
+            title: { type: "text", required: true, label: "Título" },
+          },
+        }
+      );
+    },
+
+    // UI actions
+    setSelectedSection(section) {
+      console.log(`🎯 [SIMPLES] Navegando para seção: ${section}`);
+      dispatch({ type: actionTypes.SET_SELECTED_SECTION, payload: section });
+
+      // Simplificado: carregar dados diretamente e definir contentType
+      try {
+        // Carregar dados da seção
+        const data = this.loadSectionData(section);
+
+        // Definir seção atual com ContentType simples
+        const sectionConfig = {
+          sectionId: section,
+          title: section.charAt(0).toUpperCase() + section.slice(1),
+          contentType: this.getSimpleContentType(section),
+          availableAddons: this.getAvailableAddonsForSection(section),
+        };
+
+        dispatch({
+          type: actionTypes.SET_CURRENT_SECTION,
+          payload: sectionConfig,
+        });
+
+        console.log(
+          `📊 [SIMPLES] Seção ${section} configurada com ${data.length} itens`
+        );
+      } catch (error) {
+        console.error(`❌ Erro ao configurar seção ${section}:`, error);
+      }
+    },
+
+    // Addons disponíveis por seção (simplificado)
+    getAvailableAddonsForSection(sectionId) {
+      const sectionAddons = {
+        blog: ["TextInput", "WYSIWYG", "Slug", "ImageUpload", "SEOFields"],
+        users: ["TextInput", "ImageUpload"],
+        overview: ["TextInput"],
+      };
+
+      return sectionAddons[sectionId] || ["TextInput"];
     },
 
     setSelectedPipeline(pipeline) {
@@ -618,21 +855,49 @@ export function DashboardProvider({ children }) {
       dispatch({ type: actionTypes.UPDATE_PROVIDER, payload: { type, data } });
     },
 
-    // SectionMaster actions
+    // SectionMaster actions - SIMPLIFICADO
     loadSectionData(sectionId) {
-      if (state.sectionManager) {
-        const data = state.sectionManager.getSectionData(sectionId);
-        dispatch({ type: actionTypes.SET_CURRENT_SECTION_DATA, payload: data });
-        console.log(`📊 Loaded data for section: ${sectionId}`, data);
+      try {
+        const storageKey = `pipesnow_${sectionId}_items`;
+        const stored = localStorage.getItem(storageKey);
+
+        if (stored) {
+          const data = JSON.parse(stored);
+          dispatch({
+            type: actionTypes.SET_SECTION_DATA,
+            payload: { sectionId, data },
+          });
+          console.log(
+            `📊 [SIMPLES] Dados carregados para ${sectionId}:`,
+            data.length,
+            "itens"
+          );
+          return data;
+        }
+
+        // Dados padrão se não existirem
+        const defaultData = this.getDefaultSectionData(sectionId);
+        dispatch({
+          type: actionTypes.SET_SECTION_DATA,
+          payload: { sectionId, data: defaultData },
+        });
+
+        // Salvar dados padrão no localStorage para próxima vez
+        localStorage.setItem(storageKey, JSON.stringify(defaultData));
+
+        return defaultData;
+      } catch (error) {
+        console.error(
+          `❌ Erro ao carregar dados da seção ${sectionId}:`,
+          error
+        );
+        return [];
       }
     },
 
     toggleDevMode() {
       const newDevMode = !state.devMode;
       dispatch({ type: actionTypes.SET_DEV_MODE, payload: newDevMode });
-      if (state.sectionManager) {
-        state.sectionManager.setDevMode(newDevMode);
-      }
       toast.success(`DevMode ${newDevMode ? "ativado" : "desativado"}`);
     },
 
@@ -642,9 +907,6 @@ export function DashboardProvider({ children }) {
         type: actionTypes.SET_UNDER_CONSTRUCTION,
         payload: newUnderConstruction,
       });
-      if (state.sectionManager) {
-        state.sectionManager.setUnderConstruction(newUnderConstruction);
-      }
       toast.success(
         `UnderConstruction ${newUnderConstruction ? "ativado" : "desativado"}`
       );

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useDashboard } from "../contexts/DashboardContext";
-import DynamicSectionContainer from "../components/layout/DynamicSectionContainer";
+import DynamicSectionContainer from "../components/core/DynamicSectionContainer";
 
 export default function SectionMasterContainer() {
   const { state, actions } = useDashboard();

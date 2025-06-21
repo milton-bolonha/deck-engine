@@ -11,60 +11,84 @@ const INTERNAL_DATA = {
       name: "Campo de Texto",
       category: "Form",
       description: "Campo básico de entrada de texto",
+      icon: "fas fa-edit",
+      iconBgColor: "bg-blue-100",
+      iconColor: "text-blue-600",
       includedInPlans: ["tier0", "tier1", "tier2", "tier3"],
       unlockType: "includedInPlan",
       price: 0,
       underConstruction: false,
+      compatibleContentTypes: ["*"],
     },
     Slug: {
       id: "Slug",
       name: "URL Amigável",
       category: "Form",
       description: "Geração automática de URLs amigáveis",
+      icon: "fas fa-link",
+      iconBgColor: "bg-green-100",
+      iconColor: "text-green-600",
       includedInPlans: ["tier0", "tier1", "tier2", "tier3"],
       unlockType: "includedInPlan",
       price: 0,
       underConstruction: false,
+      compatibleContentTypes: ["post", "page", "*"],
     },
     WYSIWYG: {
       id: "WYSIWYG",
       name: "Editor Rico",
       category: "Form",
       description: "Editor WYSIWYG completo",
+      icon: "fas fa-edit",
+      iconBgColor: "bg-purple-100",
+      iconColor: "text-purple-600",
       includedInPlans: ["tier1", "tier2", "tier3"],
       unlockType: "includedInPlan",
       price: 0,
       underConstruction: false,
+      compatibleContentTypes: ["post", "page", "dashboard", "*"],
     },
     ImageUpload: {
       id: "ImageUpload",
       name: "Upload de Imagem",
       category: "Mídia",
       description: "Sistema de upload e gerenciamento de imagens",
+      icon: "fas fa-image",
+      iconBgColor: "bg-yellow-100",
+      iconColor: "text-yellow-600",
       includedInPlans: ["tier1", "tier2", "tier3"],
       unlockType: "includedInPlan",
       price: 0,
       underConstruction: false,
+      compatibleContentTypes: ["*"],
     },
     SEOFields: {
       id: "SEOFields",
       name: "Campos SEO",
       category: "Form",
       description: "Meta tags e otimização SEO",
+      icon: "fas fa-search",
+      iconBgColor: "bg-orange-100",
+      iconColor: "text-orange-600",
       includedInPlans: ["tier1", "tier2", "tier3"],
       unlockType: "includedInPlan",
       price: 0,
       underConstruction: false,
+      compatibleContentTypes: ["post", "page", "*"],
     },
     CategorySystem: {
       id: "CategorySystem",
       name: "Sistema de Categorias",
       category: "Form",
       description: "Organização hierárquica por categorias",
+      icon: "fas fa-folder",
+      iconBgColor: "bg-indigo-100",
+      iconColor: "text-indigo-600",
       includedInPlans: ["tier2", "tier3"],
       unlockType: "includedInPlan",
       price: 0,
       underConstruction: false,
+      compatibleContentTypes: ["*"],
     },
     TagSystem: {
       id: "TagSystem",
@@ -620,11 +644,37 @@ export class DataProvider {
 
   setSectionData(sectionId, data) {
     this.sectionData.set(sectionId, data);
+
+    // Salvar também no formato usado pelo sistema (pipesnow_)
+    if (typeof window !== "undefined") {
+      try {
+        const storageKey = `pipesnow_${sectionId}_items`;
+        localStorage.setItem(storageKey, JSON.stringify(data));
+      } catch (error) {
+        console.warn("Failed to save to pipesnow format:", error);
+      }
+    }
+
     this.saveSectionData();
     console.log(`💾 Section data saved: ${sectionId}`, data);
   }
 
   getSectionData(sectionId) {
+    // Tentar carregar do formato pipesnow_ primeiro
+    if (typeof window !== "undefined") {
+      try {
+        const storageKey = `pipesnow_${sectionId}_items`;
+        const stored = localStorage.getItem(storageKey);
+        if (stored) {
+          const data = JSON.parse(stored);
+          this.sectionData.set(sectionId, data); // Sincronizar com cache interno
+          return data;
+        }
+      } catch (error) {
+        console.warn("Failed to load from pipesnow format:", error);
+      }
+    }
+
     return this.sectionData.get(sectionId) || [];
   }
 

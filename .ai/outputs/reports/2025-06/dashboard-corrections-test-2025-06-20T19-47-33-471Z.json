@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-06-20T19-47-33-471Z",
+  "tests": [],
+  "errors": [
+    {
+      "message": "net::ERR_CONNECTION_REFUSED at http://localhost:3000",
+      "stack": "Error: net::ERR_CONNECTION_REFUSED at http://localhost:3000\n    at navigate (C:\\Users\\milto\\Documents\\pipesnow\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\cdp\\Frame.js:170:27)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Deferred.race (C:\\Users\\milto\\Documents\\pipesnow\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\util\\Deferred.js:31:20)\n    at async CdpFrame.goto (C:\\Users\\milto\\Documents\\pipesnow\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\cdp\\Frame.js:136:25)\n    at async CdpPage.goto (C:\\Users\\milto\\Documents\\pipesnow\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\api\\Page.js:603:20)\n    at async testDashboardCorrections (C:\\Users\\milto\\Documents\\pipesnow\\test-dashboard-correcoes.js:38:5)"
+    }
+  ],
+  "corrections": []
+}

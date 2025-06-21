@@ -72,6 +72,22 @@ class SectionManager {
 
   // ===== SECTION MANAGEMENT =====
 
+  getSection(sectionId) {
+    if (!this.initialized) return null;
+
+    const section = this.sections[sectionId];
+    if (!section) return null;
+
+    // Enriquecer a seção com dados dinâmicos
+    const userTier = this.planManager.getUserTier(this.userPlan);
+    return {
+      ...section,
+      contentType: this.getContentType(section.contentTypeId),
+      availableAddons: this.getAvailableAddonsForSection(section, userTier),
+      canAccess: this.canAccessSection(section, userTier),
+    };
+  }
+
   getAccessibleSections() {
     if (!this.initialized) return [];
 
@@ -105,7 +121,7 @@ class SectionManager {
 
     // Addons inclusos por tier
     for (let tier = 0; tier <= userTier; tier++) {
-      if (section.includedAddonsByTier[tier]) {
+      if (section.includedAddonsByTier && section.includedAddonsByTier[tier]) {
         availableAddons.push(...section.includedAddonsByTier[tier]);
       }
     }
